@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#08090d">
+<title>JARVIS ONE — IRON EDITION</title>
+<style>
+:root{--red:#ff263d;--gold:#ffc65b;--blue:#67e7ff}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 35%,#20202b 0,#090a10 48%,#030407 100%);color:#e9f7ff;font-family:Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+header{padding:22px 16px 8px;text-align:center;letter-spacing:4px;font-size:19px;font-weight:bold;color:var(--gold)}
+header small{display:block;color:#8a9aa9;font-size:10px;letter-spacing:5px;margin-top:8px}
+.status{display:flex;justify-content:center;gap:8px;align-items:center;margin:22px 0;color:#9cecff;font-size:11px;letter-spacing:2px}
+.dot{width:7px;height:7px;border-radius:50%;background:#40ffc0;box-shadow:0 0 12px #40ffc0}
+.core-area{height:320px;display:grid;place-items:center;position:relative}
+.core{width:240px;height:240px;position:relative;display:grid;place-items:center;filter:drop-shadow(0 0 20px #ff263d55)}
+.ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--red);border-bottom-color:var(--gold);animation:spin 5s linear infinite}
+.ring.r2{inset:13px;border-width:1px;border-left-color:var(--blue);border-right-color:var(--gold);animation:spin 3s linear infinite reverse}
+.ring.r3{inset:29px;border:1px dashed #ff526b;animation:spin 12s linear infinite}
+.core-center{width:125px;height:125px;border-radius:50%;background:radial-gradient(circle,#fff4ca 0,#ffb62d 12%,#f23b30 35%,#51121e 68%,#080a10 72%);box-shadow:0 0 25px #ff3939,0 0 65px #ff5d2840;animation:pulse 2s ease-in-out infinite}
+.core::before,.core::after{content:"";position:absolute;background:linear-gradient(90deg,transparent,var(--gold),transparent);height:1px;width:285px;opacity:.6}
+.core::after{transform:rotate(90deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{transform:scale(1.09);filter:brightness(1.35)}}
+.section{text-align:center;margin:0 20px}
+h1{font-size:23px;letter-spacing:5px;margin:0;color:#fff}
+.subtitle{font-size:10px;color:var(--blue);letter-spacing:3px;margin:10px 0 22px}
+#reply{font-size:15px;color:#c6d9e6;line-height:1.6;min-height:48px;padding:0 12px}
+.controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:22px 14px}
+button{border:1px solid #a33a45;background:linear-gradient(145deg,#24121a,#0c0d13);color:#fff;border-radius:13px;padding:14px 19px;font-size:14px;letter-spacing:1px;cursor:pointer}
+button:active{transform:scale(.96)}
+button.primary{background:linear-gradient(135deg,#b8182c,#4e111e);border-color:var(--red);box-shadow:0 0 20px #ff263d25}
+input{width:calc(100% - 38px);max-width:440px;background:#0b1119;border:1px solid #334655;color:white;padding:15px;border-radius:10px;font-size:15px;outline:none}
+.inputrow{display:flex;justify-content:center;gap:7px;margin:0 10px}
+.inputrow button{padding:12px}
+footer{text-align:center;font-size:9px;letter-spacing:2px;color:#516170;margin:32px 0 18px}
+</style>
+</head>
+<body>
+<header>J.A.R.V.I.S. <small>JUST A RATHER VERY INTELLIGENT SYSTEM</small></header>
+<div class="status"><span class="dot"></span><span id="status">SISTEMA INICIALIZADO</span></div>
+<div class="core-area">
+ <div class="core" aria-label="Núcleo animado do Jarvis">
+  <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="core-center"></div>
+ </div>
+</div>
+<section class="section">
+ <h1>JARVIS ONE</h1>
+ <div class="subtitle">IRON EDITION · ONLINE</div>
+ <div id="reply">Bom dia. JARVIS ONE inicializado. Como posso ajudar?</div>
+</section>
+<div class="controls">
+ <button class="primary" id="voice">🎙 ATIVAR VOZ</button>
+ <button id="speak">🔊 FALAR</button>
+ <button id="stop">■ SILENCIAR</button>
+</div>
+<div class="inputrow">
+ <input id="command" placeholder="Digite um comando..." autocomplete="off">
+ <button class="primary" id="send">➤</button>
+</div>
+<footer>JARVIS ONE · IRON EDITION · VERSÃO 1.0</footer>
+<script>
+const reply=document.getElementById('reply');
+const status=document.getElementById('status');
+const input=document.getElementById('command');
+let lastReply='JARVIS ONE inicializado. Como posso ajudar?';
+function say(text){
+ lastReply=text;reply.textContent=text;
+ if('speechSynthesis' in window){
+  speechSynthesis.cancel();
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.lang='pt-BR';utter.rate=1;utter.pitch=.92;
+  speechSynthesis.speak(utter);
+ }
+}
+function command(raw){
+ const c=raw.trim().toLowerCase();
+ if(!c)return;
+ status.textContent='PROCESSANDO COMANDO';
+ if(c.includes('hora')){
+  say('Agora são '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+ }else if(c.includes('data')||c.includes('dia de hoje')){
+  say('Hoje é '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+ }else if(c.includes('quem é você')||c.includes('quem e voce')||c.includes('jarvis')){
+  say('Sou o JARVIS ONE, sua interface assistente. Estou pronto para receber seus comandos.');
+ }else if(c.includes('abrir youtube')){
+  say('Abrindo o YouTube no navegador.');
+  window.open('https://m.youtube.com/','_blank');
+ }else if(c.includes('abrir google')||c.includes('pesquisar')){
+  say('Abrindo a pesquisa do Google.');
+  window.open('https://www.google.com/','_blank');
+ }else if(c.includes('olá')||c.includes('ola')||c.includes('bom dia')||c.includes('boa noite')){
+  say('Saudações. Sistemas funcionando. Em que posso ajudar?');
+ }else{
+  say('Comando recebido: '+raw+'. Ainda estou aprendendo novas funções. Você pode perguntar a hora, a data ou pedir para abrir o YouTube.');
+ }
+ status.textContent='SISTEMA PRONTO';
+}
+document.getElementById('send').addEventListener('click',()=>{command(input.value);input.value='';});
+input.addEventListener('keydown',e=>{if(e.key==='Enter'){command(input.value);input.value='';}});
+document.getElementById('speak').addEventListener('click',()=>say(lastReply));
+document.getElementById('stop').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();status.textContent='ÁUDIO SILENCIADO';});
+let recognition;
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+document.getElementById('voice').addEventListener('click',()=>{
+ if(!SpeechRecognition){say('O reconhecimento de voz não está disponível neste navegador. Tente abrir a página no Chrome e permitir o uso do microfone.');return;}
+ if(recognition){try{recognition.stop();}catch(e){}}
+ recognition=new SpeechRecognition();
+ recognition.lang='pt-BR';recognition.interimResults=false;recognition.maxAlternatives=1;
+ recognition.onstart=()=>{status.textContent='OUVINDO VOCÊ...';reply.textContent='Pode falar. Estou ouvindo.';};
+ recognition.onresult=e=>command(e.results[0][0].transcript);
+ recognition.onerror=e=>{status.textContent='VOZ INDISPONÍVEL';reply.textContent='Não consegui reconhecer a voz. Confira a permissão do microfone e tente novamente.';};
+ recognition.onend=()=>{if(status.textContent==='OUVINDO VOCÊ...')status.textContent='SISTEMA PRONTO';};
+ try{recognition.start();}catch(e){status.textContent='TENTE NOVAMENTE';}
+});
+</script>
+</body>
+</html>
