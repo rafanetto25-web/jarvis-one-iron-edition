@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "JarvisOne"
 include(":app")
+project(":app").projectDir = file("App")
