@@ -1,4 +1,6 @@
+
 name: JARVIS ONE - IRON EDITION
+
 on:
   workflow_dispatch:
   push:
@@ -11,6 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Baixar projeto
         uses: actions/checkout@v4
@@ -24,10 +27,18 @@ jobs:
       - name: Corrigir nomes dos arquivos
         shell: bash
         run: |
-          if [ -f Build.gradle ] && [ ! -f build.gradle ]; then mv Build.gradle build.gradle; fi
-          if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then mv Settings.gradle settings.gradle; fi
-          if [ -d App ] && [ ! -d app ]; then mv App app; fi
-          if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then mv app/Build.gradle app/build.gradle; fi
+          if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
+            mv Build.gradle build.gradle
+          fi
+          if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then
+            mv Settings.gradle settings.gradle
+          fi
+          if [ -d App ] && [ ! -d app ]; then
+            mv App app
+          fi
+          if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then
+            mv app/Build.gradle app/build.gradle
+          fi
 
       - name: Conferir arquivos
         run: |
@@ -49,9 +60,17 @@ jobs:
       - name: Compilar APK
         run: ./gradlew :app:assembleDebug --no-daemon
 
-      - name: Publicar APK
+      - name: Verificar APK gerado
+        shell: bash
+        run: |
+          echo "Procurando arquivos APK..."
+          find app/build/outputs/apk -type f -name "*.apk" -print
+          test -n "$(find app/build/outputs/apk -type f -name "*.apk" -print -quit)"
+
+      - name: Publicar APK para download
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-ONE-IRON-EDITION-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/**/*.apk
           if-no-files-found: error
+          retention-days: 7
