@@ -9,9 +9,11 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build:
+    name: Compilar e publicar APK
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +25,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Corrigir nomes dos arquivos
         shell: bash
@@ -46,6 +49,7 @@ jobs:
       - name: Conferir arquivos do projeto
         shell: bash
         run: |
+          set -e
           test -f settings.gradle
           test -f build.gradle
           test -f app/build.gradle
@@ -57,32 +61,83 @@ jobs:
           gradle-version: "8.9"
 
       - name: Criar Gradle Wrapper
+        shell: bash
         run: |
           gradle wrapper --gradle-version 8.9
           chmod +x gradlew
 
-      - name: Compilar APK
-        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Compilar APK Debug
+        shell: bash
+        run: |
+          set -e
+          ./gradlew :app:assembleDebug --no-daemon
 
       - name: Verificar APK gerado
         shell: bash
         run: |
+          set -e
+
           APK="app/build/outputs/apk/debug/app-debug.apk"
 
           if [ ! -f "$APK" ]; then
-            echo "ERRO: APK não encontrado em $APK"
-            echo "Arquivos APK encontrados no projeto:"
+            echo "::error::APK não encontrado em $APK"
+            echo "Arquivos APK encontrados:"
             find . -type f -name "*.apk" -print || true
             exit 1
           fi
 
-          echo "APK gerado com sucesso:"
+          echo "APK encontrado:"
           ls -lh "$APK"
 
-      - name: Publicar APK para download
+          SIZE=$(stat -c%s "$APK")
+          echo "Tamanho do APK: $SIZE bytes"
+
+          if [ "$SIZE" -lt 50000 ]; then
+            echo "::warning::APK muito pequeno. Verifique se o projeto contém o aplicativo completo."
+          fi
+
+          echo "apk_path=$APK" >> "$GITHUB_ENV"
+
+      - name: Validar estrutura do APK
+        shell: bash
+        run: |
+          set -e
+
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+
+          if ! unzip -t "$APK"; then
+            echo "::error::O arquivo APK não é um ZIP válido."
+            exit 1
+          fi
+
+          if ! unzip -l "$APK" | grep -q "AndroidManifest.xml"; then
+            echo "::error::AndroidManifest.xml não encontrado dentro do APK."
+            exit 1
+          fi
+
+          echo "Estrutura ZIP e manifesto encontrados."
+
+      - name: Publicar APK para download - ARTIFACTS
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-ONE-IRON-EDITION-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
+          compression-level: 0
+
+      - name: Resumo do build
+        if: success()
+        shell: bash
+        run: |
+          {
+            echo "## JARVIS ONE - IRON EDITION"
+            echo ""
+            echo "Build concluído e APK publicado em Artifacts."
+            echo ""
+            echo "- **Arquivo:** app-debug.apk"
+            echo "- **Download:** seção Artifacts desta execução"
+            echo "- **Retenção:** 7 dias"
+            echo ""
+            echo "O APK deve ser testado em um dispositivo Android."
+          } >> "$GITHUB_STEP_SUMMARY"
