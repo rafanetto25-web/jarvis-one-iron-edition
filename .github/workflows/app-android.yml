@@ -4,10 +4,6 @@ name: JARVIS ONE - IRON EDITION
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - master
-      - principal
 
 permissions:
   contents: read
@@ -25,6 +21,16 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: Diagnosticar arquivos
+        shell: bash
+        run: |
+          echo "=== RAIZ DO REPOSITORIO ==="
+          pwd
+          ls -la
+
+          echo "=== TODOS OS ARQUIVOS ==="
+          find . -maxdepth 6 -type f | sort
 
       - name: Corrigir nomes e pastas
         shell: bash
@@ -45,29 +51,32 @@ jobs:
             mv app/Build.gradle app/build.gradle
           fi
 
-      - name: Verificar projeto
+          if [ -f app/src/main/java/com/jarvisone/iron/MainActivity.java ]; then
+            echo "MainActivity encontrada."
+          else
+            echo "::error::MainActivity.java nao encontrada no caminho esperado."
+          fi
+
+      - name: Conferir estrutura Android
         shell: bash
         run: |
-          echo "Arquivos encontrados:"
-          find . -maxdepth 5 -type f | sort
-
           test -f settings.gradle || {
-            echo "::error::Falta settings.gradle na raiz do projeto."
+            echo "::error::settings.gradle nao encontrado na raiz."
             exit 1
           }
 
           test -f build.gradle || {
-            echo "::error::Falta build.gradle na raiz do projeto."
+            echo "::error::build.gradle nao encontrado na raiz."
             exit 1
           }
 
           test -f app/build.gradle || {
-            echo "::error::Falta app/build.gradle."
+            echo "::error::app/build.gradle nao encontrado."
             exit 1
           }
 
           test -f app/src/main/AndroidManifest.xml || {
-            echo "::error::Falta AndroidManifest.xml."
+            echo "::error::AndroidManifest.xml nao encontrado."
             exit 1
           }
 
