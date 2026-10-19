@@ -4,621 +4,759 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#050811">
+<meta name="theme-color" content="#050505">
 <title>JARVIS ONE</title>
 
 <style>
 :root {
-  --red: #ff243f;
-  --blue: #36cfff;
-  --blue2: #176dff;
-  --gold: #ffc45c;
-  --glow: rgba(35, 180, 255, .6);
+  --red: #ff2020;
+  --red-light: #ff6565;
+  --yellow: #ffd21a;
+  --yellow-light: #fff1a0;
+  --bg: #050607;
+  --text: #e9f5ff;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
-  color: #edf8ff;
-  font-family: Arial, sans-serif;
-  background:
-    radial-gradient(ellipse at 50% 35%, #111a2b 0%, #080b14 48%, #020307 100%);
+  min-height: 100dvh;
   overflow-x: hidden;
+  background:
+    radial-gradient(ellipse at 50% 42%, #25100a 0%, #0b0807 27%, #050607 65%);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .16;
+  background-image:
+    linear-gradient(rgba(255,210,26,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,210,26,.10) 1px, transparent 1px);
+  background-size: 35px 35px;
+  mask-image: radial-gradient(ellipse, black, transparent 78%);
 }
 
 header {
+  width: 100%;
+  padding: 25px 15px 0;
   text-align: center;
-  padding: 22px 10px 8px;
-  color: #7edfff;
-  font-size: 21px;
-  font-weight: bold;
-  letter-spacing: 5px;
-  text-shadow: 0 0 15px #36cfff55;
-}
-
-header small {
-  display: block;
-  color: #788da5;
-  font-size: 9px;
-  letter-spacing: 3px;
-  margin-top: 8px;
-}
-
-.status {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 9px;
-  margin: 19px 0 0;
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #8cdbff;
-  text-align: center;
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: #42ffc0;
-  box-shadow: 0 0 12px #42ffc0;
-}
-
-body[data-mode="listening"] .dot,
-body[data-mode="speaking"] .dot {
-  background: var(--blue);
-  box-shadow: 0 0 14px var(--blue);
-  animation: blink .5s infinite alternate;
-}
-
-body[data-mode="thinking"] .dot {
-  background: var(--gold);
-  box-shadow: 0 0 14px var(--gold);
-  animation: blink .4s infinite alternate;
-}
-
-/* ÁREA DO NÚCLEO */
-
-.core-area {
-  height: clamp(290px, 84vw, 355px);
   position: relative;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+  z-index: 2;
 }
 
-.core {
-  width: clamp(210px, 61vw, 250px);
+.brand {
+  font-size: 27px;
+  letter-spacing: 7px;
+  font-weight: 800;
+  color: var(--yellow-light);
+  text-shadow: 0 0 16px #ffb30080;
+}
+
+.subtitle {
+  margin-top: 9px;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: #9d9280;
+}
+
+main {
+  width: 100%;
+  max-width: 560px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px 22px;
+  position: relative;
+  z-index: 1;
+}
+
+.reactor-wrap {
+  width: min(76vw, 320px);
   aspect-ratio: 1;
   position: relative;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 0 20px var(--glow));
-  transition: filter .3s;
+  margin: 12px auto 20px;
+  filter: drop-shadow(0 0 13px #ff3b1730);
 }
 
-.core::before,
-.core::after {
-  content: "";
-  position: absolute;
-  width: 118%;
-  height: 1px;
-  background: linear-gradient(
-    90deg, transparent, var(--blue), transparent
-  );
-  opacity: .55;
-}
-
-.core::after {
-  transform: rotate(90deg);
+.reactor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  animation: reactorFloat 4s ease-in-out infinite;
 }
 
 .ring {
   position: absolute;
-  inset: 0;
   border-radius: 50%;
+  pointer-events: none;
+}
+
+.ring-outer {
+  inset: 2%;
   border: 2px solid transparent;
-  border-top-color: var(--blue);
-  border-bottom-color: var(--blue2);
-  box-shadow: 0 0 10px #168fff20;
+  border-top-color: var(--yellow);
+  border-bottom-color: #ffad00;
+  box-shadow: 0 0 12px #ffbd0080, inset 0 0 10px #ffbd0020;
+  animation: spin 12s linear infinite;
+}
+
+.ring-outer::before,
+.ring-outer::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--yellow-light);
+  box-shadow: 0 0 13px var(--yellow);
+}
+
+.ring-outer::before {
+  top: 10%;
+  left: 19%;
+}
+
+.ring-outer::after {
+  bottom: 10%;
+  right: 19%;
+}
+
+.ring-middle {
+  inset: 9%;
+  border: 1px dashed #ffcb35;
+  box-shadow: 0 0 10px #ffba0020;
+  animation: spinReverse 18s linear infinite;
+}
+
+.ring-inner {
+  inset: 16%;
+  border: 3px solid #a86c16;
+  border-top-color: #fff09a;
+  border-right-color: var(--yellow);
+  border-bottom-color: #b96c09;
+  box-shadow: 0 0 16px #ffad0060, inset 0 0 16px #ffbb0030;
+  animation: spin 7s linear infinite;
+}
+
+.ring-inner::before,
+.ring-inner::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 12px var(--yellow);
+}
+
+.ring-inner::before {
+  top: 13%;
+  right: 18%;
+}
+
+.ring-inner::after {
+  bottom: 13%;
+  left: 18%;
+}
+
+.core-halo {
+  width: 53%;
+  height: 53%;
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    #ffb13b 0%,
+    #ff3d18 28%,
+    #b40000 52%,
+    #4a0000 72%,
+    transparent 100%);
+  filter: blur(3px);
+  box-shadow: 0 0 28px #ff2716a0, 0 0 65px #ff190050;
+  animation: corePulse 2.2s ease-in-out infinite;
+}
+
+.core {
+  position: relative;
+  z-index: 2;
+  width: 34%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 37% 30%,
+    #fff6be 0%,
+    #ffb13b 12%,
+    #ff311a 34%,
+    #a60000 63%,
+    #260000 100%);
+  border: 2px solid #ffb54d;
+  box-shadow:
+    0 0 12px #ff3529,
+    0 0 28px #ff1a1a,
+    0 0 55px #ff250060,
+    inset 0 0 13px #ff9a55;
+  animation: corePulse 1.8s ease-in-out infinite;
+}
+
+.core::after {
+  content: "";
+  position: absolute;
+  inset: 15%;
+  border: 1px solid #ffe39a90;
+  border-radius: 50%;
   animation: spin 5s linear infinite;
 }
 
-.ring.r2 {
-  inset: 5%;
-  border-width: 1px;
-  border-left-color: #65eaff;
-  border-right-color: #2479ff;
-  animation-duration: 3s;
-  animation-direction: reverse;
-}
-
-.ring.r3 {
-  inset: 12%;
-  border: 1px dashed #39cfff;
-  animation-duration: 11s;
-}
-
-.ring.r4 {
-  inset: 19%;
-  border: 2px solid transparent;
-  border-top-color: #9af3ff;
-  border-bottom-color: #176dff;
-  animation-duration: 2s;
-  animation-direction: reverse;
-}
-
-.ring.r5 {
-  inset: 26%;
-  border: 1px solid #36cfff88;
-  border-left-color: #8deeff;
-  border-right-color: #176dff;
-  animation-duration: 7s;
-}
-
-.scan {
+.scanner {
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 280deg,
-    #36cfff77 330deg,
-    transparent 360deg
-  );
-  animation: spin 4s linear infinite;
-  -webkit-mask: radial-gradient(
-    circle, transparent 57%, #000 59%, #000 62%, transparent 64%
-  );
-  mask: radial-gradient(
-    circle, transparent 57%, #000 59%, #000 62%, transparent 64%
-  );
+  z-index: 3;
+  width: 65%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffdb4c, white, #ff3820, transparent);
+  box-shadow: 0 0 12px var(--yellow);
+  opacity: .7;
+  animation: scan 3.5s ease-in-out infinite;
 }
 
-/* CENTRO VERMELHO */
+.orbit-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 50%;
+  left: 50%;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff3a0;
+  box-shadow: 0 0 12px var(--yellow);
+  animation: orbit 6s linear infinite;
+}
 
-.core-center {
+.status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 2px 0 12px;
+  color: var(--yellow-light);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffbc25;
+  box-shadow: 0 0 10px #ffbc25;
+}
+
+#response {
+  min-height: 44px;
+  max-width: 430px;
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e4e4e4;
+  margin-bottom: 15px;
+  overflow-wrap: anywhere;
+}
+
+.input-area {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  max-width: 440px;
+}
+
+#commandInput {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 15px;
+  border-radius: 25px;
+  border: 1px solid #a57824;
+  background: #101010e8;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  box-shadow: 0 0 14px #ffb0000b;
+}
+
+#commandInput:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 15px #ffbf3030;
+}
+
+button {
+  border: 1px solid #bd8a22;
+  background: linear-gradient(135deg, #2b1c08, #14100a);
+  color: var(--yellow-light);
+  border-radius: 24px;
+  min-height: 45px;
+  padding: 0 16px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:active {
+  transform: scale(.96);
+  background: #50300a;
+}
+
+#sendBtn {
+  min-width: 49px;
+  padding: 0 14px;
+  font-size: 19px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  max-width: 440px;
+  margin-top: 12px;
+}
+
+.controls button {
+  flex: 1 1 105px;
+}
+
+#voiceBtn.active {
+  color: white;
+  border-color: #ff3025;
+  background: #380c0c;
+  box-shadow: 0 0 14px #ff201f50;
+}
+
+#muteBtn.muted {
+  border-color: #777;
+  color: #aaa;
+}
+
+.hint {
+  margin-top: 15px;
+  color: #777166;
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.7;
+}
+
+footer {
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  color: #655c4d;
+  font-size: 9px;
+  letter-spacing: 2px;
   position: relative;
   z-index: 2;
-  width: 43%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    #fff 0%,
-    #ffb7bd 8%,
-    #ff263f 25%,
-    #d0002d 45%,
-    #650b28 68%,
-    #080b16 74%
-  );
-  box-shadow:
-    0 0 12px #ff263f,
-    0 0 28px #ff243f,
-    0 0 58px #ff183866,
-    inset 0 0 17px #ffffff80;
-  animation: pulse 2s ease-in-out infinite;
 }
 
-.core-center::before {
-  content: "";
-  position: absolute;
-  inset: 12%;
-  border: 1px solid #ffb7c5aa;
-  border-radius: 50%;
-  box-shadow: 0 0 13px #ff263f99;
+body[data-mode="listening"] .core,
+body[data-mode="listening"] .core-halo {
+  animation-duration: .8s;
 }
 
-.core-center::after {
-  content: "";
-  position: absolute;
-  inset: 28%;
-  border: 2px solid #ff7888;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #ff263f;
+body[data-mode="listening"] .ring-outer {
+  animation-duration: 4s;
 }
 
-/* ANIMAÇÃO DURANTE A FALA */
-
-body[data-mode="speaking"] .core {
-  animation: react .4s ease-in-out infinite alternate;
-  filter: drop-shadow(0 0 32px #36cfff);
-}
-
-body[data-mode="speaking"] .core-center {
-  animation: pulse .38s ease-in-out infinite;
-  filter: brightness(1.55);
-}
-
-body[data-mode="speaking"] .ring {
+body[data-mode="thinking"] .ring-inner {
   animation-duration: 1.5s;
 }
 
-body[data-mode="speaking"] .ring.r2 {
-  animation-duration: .9s;
+body[data-mode="speaking"] .core,
+body[data-mode="speaking"] .core-halo {
+  animation-duration: .45s;
 }
 
-body[data-mode="speaking"] .ring.r3 {
+body[data-mode="speaking"] .ring-outer {
   animation-duration: 3s;
 }
 
-body[data-mode="listening"] .core-center {
-  animation: pulse .8s ease-in-out infinite;
-}
-
-body[data-mode="listening"] .core {
-  filter: drop-shadow(0 0 27px #36cfff);
-}
-
-body[data-mode="thinking"] .core-center {
-  animation: pulse .55s ease-in-out infinite;
-  filter: brightness(1.3);
+body[data-mode="speaking"] .ring-inner {
+  animation-duration: 2s;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-@keyframes pulse {
-  50% {
-    transform: scale(1.12);
-    filter: brightness(1.5);
-  }
+@keyframes spinReverse {
+  to { transform: rotate(-360deg); }
 }
 
-@keyframes react {
-  from { scale: .98; }
-  to { scale: 1.035; }
+@keyframes corePulse {
+  0%, 100% { transform: scale(.94); opacity: .85; }
+  50% { transform: scale(1.07); opacity: 1; }
 }
 
-@keyframes blink {
-  to { opacity: .3; }
+@keyframes reactorFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
-/* TEXTO */
-
-.section {
-  text-align: center;
-  margin: 0 18px;
+@keyframes scan {
+  0%, 100% { transform: translateY(-50px); opacity: 0; }
+  20%, 80% { opacity: .8; }
+  50% { transform: translateY(50px); opacity: .45; }
 }
 
-h1 {
-  font-size: 24px;
-  letter-spacing: 5px;
-  margin: 0;
-  color: #fff;
-  text-shadow: 0 0 15px #36cfff35;
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(112px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(112px) rotate(-360deg); }
 }
 
-.subtitle {
-  color: #64dfff;
-  font-size: 10px;
-  letter-spacing: 3px;
-  margin: 10px 0 20px;
-}
-
-#reply {
-  min-height: 52px;
-  padding: 0 8px;
-  color: #c4d8e8;
-  font-size: 15px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-/* BOTÕES */
-
-.controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin: 20px 12px;
-}
-
-button {
-  padding: 13px 14px;
-  color: white;
-  font-size: 12px;
-  letter-spacing: .5px;
-  border: 1px solid #236b91;
-  border-radius: 12px;
-  background: linear-gradient(145deg, #101c30, #090d16);
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-button:active {
-  transform: scale(.96);
-}
-
-button.primary {
-  border-color: #239ee7;
-  background: linear-gradient(135deg, #135b9c, #10203c);
-  box-shadow: 0 0 15px #168fff20;
-}
-
-/* BARRA PARA ESCREVER */
-
-.inputrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 14px;
-}
-
-input {
-  width: 100%;
-  min-width: 0;
-  padding: 15px 13px;
-  border: 1px solid #28516c;
-  border-radius: 12px;
-  outline: none;
-  background: #0b111c;
-  color: white;
-  font-size: 15px;
-}
-
-input::placeholder {
-  color: #7f91a6;
-}
-
-input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 12px #36cfff20;
-}
-
-.inputrow button {
-  min-width: 48px;
-  padding: 14px;
-  font-size: 18px;
-}
-
-footer {
-  text-align: center;
-  color: #657a91;
-  font-size: 9px;
-  letter-spacing: 2px;
-  margin: 29px 0 18px;
-}
-
-@media (max-width: 360px) {
-  .core-area { height: 290px; }
-  .core { width: 205px; }
-  button { padding: 12px 10px; }
+@media (max-height: 720px) {
+  header { padding-top: 15px; }
+  .brand { font-size: 23px; }
+  .reactor-wrap { width: min(60vw, 245px); margin: 5px auto 10px; }
+  main { padding-bottom: 10px; }
+  #response { margin-bottom: 8px; min-height: 30px; }
+  .hint { margin-top: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ring, .scan, .core-center {
-    animation-duration: 4s !important;
+  .reactor, .ring, .core, .core-halo, .scanner, .orbit-dot {
+    animation-duration: 8s;
   }
 }
 </style>
 </head>
 
-<body data-mode="ready">
+<body data-mode="idle">
 
 <header>
-  J.A.R.V.I.S.
-  <small>JUST A RATHER VERY INTELLIGENT SYSTEM</small>
+  <div class="brand">JARVIS ONE</div>
+  <div class="subtitle">PERSONAL AI ASSISTANT</div>
 </header>
 
-<div class="status">
-  <span class="dot"></span>
-  <span id="status">SISTEMA PRONTO</span>
-</div>
-
-<div class="core-area">
-  <div class="core" aria-label="Núcleo energético do JARVIS">
-    <div class="ring"></div>
-    <div class="ring r2"></div>
-    <div class="ring r3"></div>
-    <div class="ring r4"></div>
-    <div class="ring r5"></div>
-    <div class="scan"></div>
-    <div class="core-center"></div>
+<main>
+  <div class="reactor-wrap" aria-label="Núcleo de energia animado">
+    <div class="reactor">
+      <div class="ring ring-outer"></div>
+      <div class="ring ring-middle"></div>
+      <div class="ring ring-inner"></div>
+      <div class="core-halo"></div>
+      <div class="core"></div>
+      <div class="scanner"></div>
+      <div class="orbit-dot"></div>
+    </div>
   </div>
-</div>
 
-<section class="section">
-  <h1>JARVIS ONE</h1>
-  <div class="subtitle">ENERGY CORE · VOZ REATIVA</div>
-  <div id="reply" aria-live="polite">
+  <div class="status">
+    <span class="status-dot"></span>
+    <span id="statusText">Aguardando, senhor</span>
+  </div>
+
+  <div id="response" aria-live="polite">
     Olá, senhor. Estou aqui.
   </div>
-</section>
 
-<div class="controls">
-  <button class="primary" id="voice">🎙 ATIVAR VOZ</button>
-  <button id="speak">🔊 FALAR</button>
-  <button id="stop">■ SILENCIAR</button>
-</div>
+  <form class="input-area" id="commandForm">
+    <input
+      id="commandInput"
+      type="text"
+      placeholder="Digite um comando..."
+      autocomplete="off"
+      aria-label="Digite um comando para o Jarvis"
+    >
+    <button id="sendBtn" type="submit" aria-label="Enviar comando">➤</button>
+  </form>
 
-<div class="inputrow">
-  <input id="command" placeholder="Digite um comando..." autocomplete="off">
-  <button class="primary" id="send" aria-label="Enviar comando">➤</button>
-</div>
+  <div class="controls">
+    <button id="voiceBtn" type="button">🎙 ATIVAR VOZ</button>
+    <button id="speakBtn" type="button">🔊 FALAR</button>
+    <button id="muteBtn" type="button">🔇 SILENCIAR</button>
+  </div>
 
-<footer>JARVIS ONE · ENERGY CORE · SISTEMA REATIVO</footer>
+  <div class="hint">
+    Use o microfone e diga “Jarvis” antes do comando.<br>
+    Ou digite diretamente na barra acima.
+  </div>
+</main>
+
+<footer>JARVIS ONE · SYSTEM INTERFACE</footer>
 
 <script>
-const reply = document.getElementById('reply');
-const status = document.getElementById('status');
-const input = document.getElementById('command');
+(() => {
+  "use strict";
 
-let lastReply = 'Olá, senhor. Estou aqui.';
-let recognition = null;
-let speaking = false;
-let listening = false;
+  const $ = id => document.getElementById(id);
 
-function setMode(mode, label) {
-  document.body.dataset.mode = mode;
-  status.textContent = label;
-}
+  const responseEl = $("response");
+  const statusEl = $("statusText");
+  const inputEl = $("commandInput");
+  const voiceBtn = $("voiceBtn");
+  const speakBtn = $("speakBtn");
+  const muteBtn = $("muteBtn");
 
-function say(text) {
-  lastReply = text;
-  reply.textContent = text;
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (!('speechSynthesis' in window)) {
-    setMode('ready', 'TEXTO EXIBIDO');
-    return;
+  let recognition = null;
+  let listening = false;
+  let muted = false;
+  let lastResponse = "Olá, senhor, estou aqui.";
+  let speaking = false;
+
+  function setMode(mode, label) {
+    document.body.dataset.mode = mode;
+    statusEl.textContent = label;
   }
 
-  speechSynthesis.cancel();
-
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'pt-BR';
-  utter.rate = 1;
-  utter.pitch = .92;
-
-  utter.onstart = () => {
-    speaking = true;
-    setMode('speaking', 'JARVIS FALANDO...');
-  };
-
-  utter.onend = () => {
-    speaking = false;
-    setMode(listening ? 'listening' : 'ready',
-      listening ? 'OUVINDO VOCÊ...' : 'SISTEMA PRONTO');
-  };
-
-  utter.onerror = () => {
-    speaking = false;
-    setMode(listening ? 'listening' : 'ready',
-      listening ? 'OUVINDO VOCÊ...' : 'SISTEMA PRONTO');
-  };
-
-  speechSynthesis.speak(utter);
-}
-
-function command(raw) {
-  const c = raw.trim().toLowerCase();
-  if (!c) return;
-
-  setMode('thinking', 'PROCESSANDO COMANDO...');
-
-  if (c.includes('hora')) {
-    say('Agora são ' + new Date().toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    }));
-
-  } else if (c.includes('data') || c.includes('dia de hoje')) {
-    say('Hoje é ' + new Date().toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }));
-
-  } else if (
-    c.includes('quem é você') ||
-    c.includes('quem e voce') ||
-    c.includes('jarvis')
-  ) {
-    say('Olá, senhor, estou aqui.');
-
-  } else if (c.includes('abrir youtube')) {
-    say('Abrindo o YouTube no navegador.');
-    window.open('https://m.youtube.com/', '_blank');
-
-  } else if (c.includes('abrir google') || c.includes('pesquisar')) {
-    say('Abrindo a pesquisa do Google.');
-    window.open('https://www.google.com/', '_blank');
-
-  } else if (
-    c.includes('olá') ||
-    c.includes('ola') ||
-    c.includes('bom dia') ||
-    c.includes('boa noite')
-  ) {
-    say('Saudações, senhor. Estou aqui.');
-
-  } else {
-    say('Comando recebido: ' + raw +
-      '. Ainda estou aprendendo novas funções. Você pode perguntar a hora, a data ou pedir para abrir o YouTube.');
-  }
-}
-
-function sendCommand() {
-  const value = input.value;
-  input.value = '';
-  command(value);
-}
-
-document.getElementById('send').addEventListener('click', sendCommand);
-
-input.addEventListener('keydown', event => {
-  if (event.key === 'Enter') sendCommand();
-});
-
-document.getElementById('speak').addEventListener('click', () => {
-  say(lastReply);
-});
-
-document.getElementById('stop').addEventListener('click', () => {
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
-
-  speaking = false;
-  setMode(listening ? 'listening' : 'ready',
-    listening ? 'OUVINDO VOCÊ...' : 'ÁUDIO SILENCIADO');
-});
-
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-document.getElementById('voice').addEventListener('click', () => {
-  if (!SpeechRecognition) {
-    say('O reconhecimento de voz não está disponível neste navegador. Tente abrir a página no Chrome e permitir o uso do microfone.');
-    return;
+  function showResponse(text) {
+    responseEl.textContent = text;
+    lastResponse = text;
   }
 
-  if (recognition) {
-    try { recognition.stop(); } catch (error) {}
+  function speak(text) {
+    showResponse(text);
+
+    if (muted || !("speechSynthesis" in window)) {
+      setMode("idle", "Aguardando, senhor");
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR";
+    utterance.rate = 0.96;
+    utterance.pitch = 0.88;
+    utterance.volume = 1;
+
+    const voices = window.speechSynthesis.getVoices();
+    const ptVoice = voices.find(v =>
+      v.lang && v.lang.toLowerCase().startsWith("pt-br")
+    ) || voices.find(v =>
+      v.lang && v.lang.toLowerCase().startsWith("pt")
+    );
+
+    if (ptVoice) utterance.voice = ptVoice;
+
+    utterance.onstart = () => {
+      speaking = true;
+      setMode("speaking", "Jarvis falando");
+    };
+
+    utterance.onend = () => {
+      speaking = false;
+      if (!listening) setMode("idle", "Aguardando, senhor");
+    };
+
+    utterance.onerror = () => {
+      speaking = false;
+      if (!listening) setMode("idle", "Aguardando, senhor");
+    };
+
+    window.speechSynthesis.speak(utterance);
   }
 
-  recognition = new SpeechRecognition();
-  recognition.lang = 'pt-BR';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
+  function answerCommand(raw, fromVoice = false) {
+    const original = String(raw || "").trim();
+    if (!original) return;
 
-  recognition.onstart = () => {
-    listening = true;
-    setMode('listening', 'OUVINDO VOCÊ...');
-    reply.textContent = 'Pode falar. Estou ouvindo.';
-  };
+    const command = original.toLocaleLowerCase("pt-BR")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
 
-  recognition.onresult = event => {
-    listening = false;
-    command(event.results[0][0].transcript);
-  };
+    // Na voz, o nome Jarvis é obrigatório.
+    if (fromVoice && !/\bjarvis\b/i.test(command)) {
+      return;
+    }
 
-  recognition.onerror = () => {
-    listening = false;
-    setMode('ready', 'VOZ INDISPONÍVEL');
-    reply.textContent = 'Não consegui reconhecer a voz. Confira a permissão do microfone e tente novamente.';
-  };
+    const clean = command.replace(/\bjarvis\b/gi, "")
+      .replace(/[,.!?]/g, " ")
+      .trim();
 
-  recognition.onend = () => {
-    listening = false;
-    if (!speaking) setMode('ready', 'SISTEMA PRONTO');
-  };
+    if (!clean || /^(oi|ola|bom dia|boa tarde|boa noite|como esta|tudo bem|esta ai)$/.test(clean)) {
+      speak("Olá, senhor, estou aqui.");
+      return;
+    }
 
-  try {
-    recognition.start();
-  } catch (error) {
-    listening = false;
-    setMode('ready', 'TENTE NOVAMENTE');
+    if (/\b(hora|horas|horario)\b/.test(clean)) {
+      const now = new Date();
+      const time = now.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      speak("Senhor, agora são " + time + ".");
+      return;
+    }
+
+    if (/\b(data|dia de hoje|dia hoje)\b/.test(clean)) {
+      const date = new Date().toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+      speak("Senhor, hoje é " + date + ".");
+      return;
+    }
+
+    if (/\b(quem e voce|seu nome|quem e voce mesmo)\b/.test(clean)) {
+      speak("Sou o Jarvis, seu assistente pessoal.");
+      return;
+    }
+
+    if (/\b(abra|abrir|abre|acessar)\b/.test(clean) && /\byoutube\b/.test(clean)) {
+      speak("Abrindo o YouTube, senhor.");
+      window.open("https://www.youtube.com/", "_blank", "noopener");
+      return;
+    }
+
+    if (/\b(abra|abrir|abre|acessar)\b/.test(clean) && /\bgoogle\b/.test(clean)) {
+      speak("Abrindo o Google, senhor.");
+      window.open("https://www.google.com/", "_blank", "noopener");
+      return;
+    }
+
+    if (/\b(abra|abrir|abre|acessar)\b/.test(clean) && /\bwhatsapp\b/.test(clean)) {
+      speak("Abrindo o WhatsApp, senhor.");
+      window.open("https://web.whatsapp.com/", "_blank", "noopener");
+      return;
+    }
+
+    if (/\b(ajuda|o que voce faz|comandos)\b/.test(clean)) {
+      speak("Senhor, posso informar a hora e a data, abrir alguns sites e responder aos comandos básicos. Você também pode digitar seu comando na barra.");
+      return;
+    }
+
+    if (/\b(obrigado|obrigada|valeu)\b/.test(clean)) {
+      speak("Sempre à disposição, senhor.");
+      return;
+    }
+
+    speak("Entendi, senhor. Ainda não tenho uma ação configurada para esse comando.");
   }
-});
 
-setMode('ready', 'SISTEMA PRONTO');
+  $("commandForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    inputEl.value = "";
+    answerCommand(text, false);
+  });
+
+  voiceBtn.addEventListener("click", () => {
+    if (!SpeechRecognition) {
+      speak("Senhor, o reconhecimento de voz não está disponível neste navegador. Tente abrir o JARVIS no Chrome atualizado e verifique a permissão do microfone.");
+      return;
+    }
+
+    if (listening && recognition) {
+      recognition.stop();
+      return;
+    }
+
+    try {
+      recognition = new SpeechRecognition();
+      recognition.lang = "pt-BR";
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        listening = true;
+        voiceBtn.classList.add("active");
+        voiceBtn.textContent = "🎙 VOZ ATIVA";
+        setMode("listening", "Escutando, senhor");
+      };
+
+      recognition.onresult = event => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (!event.results[i].isFinal) continue;
+
+          const transcript = event.results[i][0].transcript.trim();
+
+          // Ignora completamente qualquer fala sem "Jarvis".
+          if (!/\bjarvis\b/i.test(transcript)) continue;
+
+          answerCommand(transcript, true);
+        }
+      };
+
+      recognition.onerror = event => {
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          showResponse("Senhor, permita o acesso ao microfone nas configurações do Chrome.");
+          setMode("idle", "Microfone sem permissão");
+        } else if (event.error !== "no-speech" && event.error !== "aborted") {
+          showResponse("Não consegui reconhecer a voz. Tente novamente, senhor.");
+        }
+      };
+
+      recognition.onend = () => {
+        listening = false;
+        voiceBtn.classList.remove("active");
+        voiceBtn.textContent = "🎙 ATIVAR VOZ";
+        setMode("idle", "Aguardando, senhor");
+      };
+
+      recognition.start();
+    } catch (error) {
+      showResponse("Senhor, não foi possível iniciar o microfone. Tente novamente.");
+      setMode("idle", "Aguardando, senhor");
+    }
+  });
+
+  speakBtn.addEventListener("click", () => {
+    if (muted) {
+      muted = false;
+      muteBtn.classList.remove("muted");
+      muteBtn.textContent = "🔇 SILENCIAR";
+    }
+    speak(lastResponse || "Olá, senhor, estou aqui.");
+  });
+
+  muteBtn.addEventListener("click", () => {
+    muted = !muted;
+    muteBtn.classList.toggle("muted", muted);
+    muteBtn.textContent = muted ? "🔇 SOM DESLIGADO" : "🔇 SILENCIAR";
+
+    if (muted && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      speaking = false;
+      if (!listening) setMode("idle", "Áudio silenciado");
+    } else {
+      setMode("idle", "Aguardando, senhor");
+    }
+  });
+
+  // Vozes do navegador podem carregar de forma assíncrona.
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.getVoices();
+    };
+  }
+
+  setMode("idle", "Aguardando, senhor");
+})();
 </script>
-
 </body>
 </html>
