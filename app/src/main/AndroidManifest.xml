@@ -1,23 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-permission android:name="android.permission.INTERNET" />
 
-<application
-    android:theme="@android:style/Theme.Material.NoActionBar"
-    android:label="JARVIS ONE"
-    android:usesCleartextTraffic="false"
-    android:allowBackup="false"
-    android:supportsRtl="true">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <activity
-        android:name=".MainActivity"
-        android:exported="true">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+    <application
+        android:theme="@android:style/Theme.Material.NoActionBar"
+        android:label="JARVIS ONE"
+        android:usesCleartextTraffic="false"
+        android:allowBackup="false"
+        android:supportsRtl="true">
 
-    </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
 
-</application>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
+        </activity>
+
+        <!-- Serviço de escuta em primeiro plano -->
+        <service
+            android:name=".JarvisVoiceService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+    </application>
 </manifest>
