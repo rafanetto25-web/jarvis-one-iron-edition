@@ -22,7 +22,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Corrigir nomes
+      - name: Corrigir nomes dos arquivos
         shell: bash
         run: |
           if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
@@ -41,22 +41,22 @@ jobs:
             mv app/Build.gradle app/build.gradle
           fi
 
-      - name: Verificar estrutura
+      - name: Conferir arquivos
         shell: bash
         run: |
           echo "=== ARQUIVOS ==="
           find . -maxdepth 7 -type f | sort
+          echo "=== BUILD PRINCIPAL ==="
+          cat build.gradle
+          echo "=== SETTINGS ==="
+          cat settings.gradle
+          echo "=== BUILD DO APP ==="
+          cat app/build.gradle
 
           test -f settings.gradle
           test -f build.gradle
           test -f app/build.gradle
           test -f app/src/main/AndroidManifest.xml
-
-          echo "=== CONFIGURACAO PRINCIPAL ==="
-          cat build.gradle
-
-          echo "=== CONFIGURACAO DO APP ==="
-          cat app/build.gradle
 
       - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -68,13 +68,13 @@ jobs:
           gradle wrapper --gradle-version 8.9
           chmod +x gradlew
 
-      - name: Verificar tarefas Android
+      - name: Conferir tarefas Android
         run: ./gradlew :app:tasks --all --no-daemon
 
       - name: Compilar APK
         run: ./gradlew :app:assembleDebug --no-daemon
 
-      - name: Disponibilizar APK
+      - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-ONE-IRON-EDITION-APK
