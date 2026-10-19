@@ -25,12 +25,11 @@ jobs:
       - name: Diagnosticar arquivos
         shell: bash
         run: |
-          echo "=== RAIZ DO REPOSITORIO ==="
+          echo "=== RAIZ DO PROJETO ==="
           pwd
           ls -la
-
-          echo "=== TODOS OS ARQUIVOS ==="
-          find . -maxdepth 6 -type f | sort
+          echo "=== ARQUIVOS DO PROJETO ==="
+          find . -maxdepth 7 -type f | sort
 
       - name: Corrigir nomes e pastas
         shell: bash
@@ -51,34 +50,41 @@ jobs:
             mv app/Build.gradle app/build.gradle
           fi
 
-          if [ -f app/src/main/java/com/jarvisone/iron/MainActivity.java ]; then
-            echo "MainActivity encontrada."
+          if [ -f app/src/main/AndroidManifest.xml ]; then
+            echo "Manifest Android encontrado."
           else
-            echo "::error::MainActivity.java nao encontrada no caminho esperado."
+            echo "::error::AndroidManifest.xml nao encontrado."
+            exit 1
           fi
 
-      - name: Conferir estrutura Android
+      - name: Verificar estrutura
         shell: bash
         run: |
           test -f settings.gradle || {
-            echo "::error::settings.gradle nao encontrado na raiz."
+            echo "::error::Falta settings.gradle na raiz."
             exit 1
           }
 
           test -f build.gradle || {
-            echo "::error::build.gradle nao encontrado na raiz."
+            echo "::error::Falta build.gradle na raiz."
             exit 1
           }
 
           test -f app/build.gradle || {
-            echo "::error::app/build.gradle nao encontrado."
+            echo "::error::Falta app/build.gradle."
             exit 1
           }
 
           test -f app/src/main/AndroidManifest.xml || {
-            echo "::error::AndroidManifest.xml nao encontrado."
+            echo "::error::Falta AndroidManifest.xml."
             exit 1
           }
+
+          echo "=== SETTINGS.GRADLE ==="
+          cat settings.gradle
+
+          echo "=== BUILD.GRADLE DO APP ==="
+          cat app/build.gradle
 
       - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -90,8 +96,11 @@ jobs:
           gradle wrapper --gradle-version 8.9
           chmod +x gradlew
 
+      - name: Ver tarefas Gradle
+        run: ./gradlew tasks --all --no-daemon
+
       - name: Compilar APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew :app:assembleDebug --no-daemon
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
