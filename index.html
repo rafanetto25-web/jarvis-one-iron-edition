@@ -10,11 +10,8 @@
 <style>
 :root {
   --red: #ff2020;
-  --red-light: #ff6565;
   --yellow: #ffd21a;
-  --yellow-light: #fff1a0;
   --bg: #050607;
-  --text: #e9f5ff;
 }
 
 * {
@@ -27,9 +24,8 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
-  background:
-    radial-gradient(ellipse at 50% 42%, #25100a 0%, #0b0807 27%, #050607 65%);
-  color: var(--text);
+  background: radial-gradient(ellipse at 50% 42%, #25100a, #0b0807 35%, #050607 75%);
+  color: #e9f5ff;
   font-family: Arial, Helvetica, sans-serif;
   display: flex;
   flex-direction: column;
@@ -43,8 +39,8 @@ body::before {
   pointer-events: none;
   opacity: .16;
   background-image:
-    linear-gradient(rgba(255,210,26,.10) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,210,26,.10) 1px, transparent 1px);
+    linear-gradient(#ffd21a18 1px, transparent 1px),
+    linear-gradient(90deg, #ffd21a18 1px, transparent 1px);
   background-size: 35px 35px;
   mask-image: radial-gradient(ellipse, black, transparent 78%);
 }
@@ -61,7 +57,7 @@ header {
   font-size: 27px;
   letter-spacing: 7px;
   font-weight: 800;
-  color: var(--yellow-light);
+  color: #fff1a0;
   text-shadow: 0 0 16px #ffb30080;
 }
 
@@ -92,7 +88,6 @@ main {
   display: grid;
   place-items: center;
   margin: 12px auto 20px;
-  filter: drop-shadow(0 0 13px #ff3b1730);
 }
 
 .reactor {
@@ -101,7 +96,7 @@ main {
   height: 100%;
   display: grid;
   place-items: center;
-  animation: reactorFloat 4s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
 .ring {
@@ -113,7 +108,7 @@ main {
 .ring-outer {
   inset: 2%;
   border: 2px solid transparent;
-  border-top-color: var(--yellow);
+  border-top-color: #fff1a0;
   border-bottom-color: #ffad00;
   box-shadow: 0 0 12px #ffbd0080, inset 0 0 10px #ffbd0020;
   animation: spin 12s linear infinite;
@@ -126,8 +121,8 @@ main {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--yellow-light);
-  box-shadow: 0 0 13px var(--yellow);
+  background: #fff5ba;
+  box-shadow: 0 0 13px #ffd21a;
 }
 
 .ring-outer::before {
@@ -143,7 +138,6 @@ main {
 .ring-middle {
   inset: 9%;
   border: 1px dashed #ffcb35;
-  box-shadow: 0 0 10px #ffba0020;
   animation: spinReverse 18s linear infinite;
 }
 
@@ -151,7 +145,7 @@ main {
   inset: 16%;
   border: 3px solid #a86c16;
   border-top-color: #fff09a;
-  border-right-color: var(--yellow);
+  border-right-color: #ffd21a;
   border-bottom-color: #b96c09;
   box-shadow: 0 0 16px #ffad0060, inset 0 0 16px #ffbb0030;
   animation: spin 7s linear infinite;
@@ -165,7 +159,7 @@ main {
   height: 7px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 0 12px var(--yellow);
+  box-shadow: 0 0 12px #ffd21a;
 }
 
 .ring-inner::before {
@@ -183,15 +177,10 @@ main {
   height: 53%;
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle,
-    #ffb13b 0%,
-    #ff3d18 28%,
-    #b40000 52%,
-    #4a0000 72%,
-    transparent 100%);
+  background: radial-gradient(circle, #ffb13b 0%, #ff3d18 28%, #b40000 52%, #4a0000 72%, transparent 100%);
   filter: blur(3px);
   box-shadow: 0 0 28px #ff2716a0, 0 0 65px #ff190050;
-  animation: corePulse 2.2s ease-in-out infinite;
+  animation: pulse 2.2s ease-in-out infinite;
 }
 
 .core {
@@ -200,19 +189,10 @@ main {
   width: 34%;
   height: 34%;
   border-radius: 50%;
-  background: radial-gradient(circle at 37% 30%,
-    #fff6be 0%,
-    #ffb13b 12%,
-    #ff311a 34%,
-    #a60000 63%,
-    #260000 100%);
+  background: radial-gradient(circle at 37% 30%, #fff6be, #ffb13b 12%, #ff311a 34%, #a60000 63%, #260000);
   border: 2px solid #ffb54d;
-  box-shadow:
-    0 0 12px #ff3529,
-    0 0 28px #ff1a1a,
-    0 0 55px #ff250060,
-    inset 0 0 13px #ff9a55;
-  animation: corePulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 12px #ff3529, 0 0 28px #ff1a1a, 0 0 55px #ff250060, inset 0 0 13px #ff9a55;
+  animation: pulse 1.8s ease-in-out infinite;
 }
 
 .core::after {
@@ -230,7 +210,7 @@ main {
   width: 65%;
   height: 2px;
   background: linear-gradient(90deg, transparent, #ffdb4c, white, #ff3820, transparent);
-  box-shadow: 0 0 12px var(--yellow);
+  box-shadow: 0 0 12px #ffd21a;
   opacity: .7;
   animation: scan 3.5s ease-in-out infinite;
 }
@@ -244,7 +224,7 @@ main {
   margin: -4px;
   border-radius: 50%;
   background: #fff3a0;
-  box-shadow: 0 0 12px var(--yellow);
+  box-shadow: 0 0 12px #ffd21a;
   animation: orbit 6s linear infinite;
 }
 
@@ -253,7 +233,7 @@ main {
   align-items: center;
   gap: 9px;
   margin: 2px 0 12px;
-  color: var(--yellow-light);
+  color: #fff1a0;
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -296,18 +276,17 @@ main {
   color: white;
   font-size: 14px;
   outline: none;
-  box-shadow: 0 0 14px #ffb0000b;
 }
 
 #commandInput:focus {
-  border-color: var(--yellow);
+  border-color: #ffd21a;
   box-shadow: 0 0 15px #ffbf3030;
 }
 
 button {
   border: 1px solid #bd8a22;
   background: linear-gradient(135deg, #2b1c08, #14100a);
-  color: var(--yellow-light);
+  color: #fff1a0;
   border-radius: 24px;
   min-height: 45px;
   padding: 0 16px;
@@ -370,8 +349,6 @@ footer {
   color: #655c4d;
   font-size: 9px;
   letter-spacing: 2px;
-  position: relative;
-  z-index: 2;
 }
 
 body[data-mode="listening"] .core,
@@ -408,12 +385,12 @@ body[data-mode="speaking"] .ring-inner {
   to { transform: rotate(-360deg); }
 }
 
-@keyframes corePulse {
+@keyframes pulse {
   0%, 100% { transform: scale(.94); opacity: .85; }
   50% { transform: scale(1.07); opacity: 1; }
 }
 
-@keyframes reactorFloat {
+@keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
@@ -425,8 +402,8 @@ body[data-mode="speaking"] .ring-inner {
 }
 
 @keyframes orbit {
-  from { transform: rotate(0deg) translateX(112px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(112px) rotate(-360deg); }
+  from { transform: rotate(0deg) translateX(min(35vw, 112px)) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(min(35vw, 112px)) rotate(-360deg); }
 }
 
 @media (max-height: 720px) {
@@ -447,7 +424,6 @@ body[data-mode="speaking"] .ring-inner {
 </head>
 
 <body data-mode="idle">
-
 <header>
   <div class="brand">JARVIS ONE</div>
   <div class="subtitle">PERSONAL AI ASSISTANT</div>
@@ -471,18 +447,10 @@ body[data-mode="speaking"] .ring-inner {
     <span id="statusText">Aguardando, senhor</span>
   </div>
 
-  <div id="response" aria-live="polite">
-    Olá, senhor. Estou aqui.
-  </div>
+  <div id="response" aria-live="polite">Olá, senhor. Estou aqui.</div>
 
   <form class="input-area" id="commandForm">
-    <input
-      id="commandInput"
-      type="text"
-      placeholder="Digite um comando..."
-      autocomplete="off"
-      aria-label="Digite um comando para o Jarvis"
-    >
+    <input id="commandInput" type="text" placeholder="Digite um comando..." autocomplete="off" aria-label="Digite um comando para o Jarvis">
     <button id="sendBtn" type="submit" aria-label="Enviar comando">➤</button>
   </form>
 
@@ -493,7 +461,7 @@ body[data-mode="speaking"] .ring-inner {
   </div>
 
   <div class="hint">
-    Use o microfone e diga “Jarvis” antes do comando.<br>
+    Diga “Jarvis” antes do comando de voz.<br>
     Ou digite diretamente na barra acima.
   </div>
 </main>
@@ -505,7 +473,6 @@ body[data-mode="speaking"] .ring-inner {
   "use strict";
 
   const $ = id => document.getElementById(id);
-
   const responseEl = $("response");
   const statusEl = $("statusText");
   const inputEl = $("commandInput");
@@ -520,7 +487,8 @@ body[data-mode="speaking"] .ring-inner {
   let listening = false;
   let muted = false;
   let lastResponse = "Olá, senhor, estou aqui.";
-  let speaking = false;
+  let restarting = false;
+  let autoStartAttempted = false;
 
   function setMode(mode, label) {
     document.body.dataset.mode = mode;
@@ -536,7 +504,8 @@ body[data-mode="speaking"] .ring-inner {
     showResponse(text);
 
     if (muted || !("speechSynthesis" in window)) {
-      setMode("idle", "Aguardando, senhor");
+      setMode(listening ? "listening" : "idle",
+        listening ? "Escutando, senhor" : "Aguardando, senhor");
       return;
     }
 
@@ -557,19 +526,22 @@ body[data-mode="speaking"] .ring-inner {
 
     if (ptVoice) utterance.voice = ptVoice;
 
-    utterance.onstart = () => {
-      speaking = true;
-      setMode("speaking", "Jarvis falando");
-    };
+    utterance.onstart = () => setMode("speaking", "Jarvis falando");
 
     utterance.onend = () => {
-      speaking = false;
-      if (!listening) setMode("idle", "Aguardando, senhor");
+      if (listening) {
+        setMode("listening", "Escutando, senhor");
+      } else {
+        setMode("idle", "Aguardando, senhor");
+      }
     };
 
     utterance.onerror = () => {
-      speaking = false;
-      if (!listening) setMode("idle", "Aguardando, senhor");
+      if (listening) {
+        setMode("listening", "Escutando, senhor");
+      } else {
+        setMode("idle", "Aguardando, senhor");
+      }
     };
 
     window.speechSynthesis.speak(utterance);
@@ -583,10 +555,8 @@ body[data-mode="speaking"] .ring-inner {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
 
-    // Na voz, o nome Jarvis é obrigatório.
-    if (fromVoice && !/\bjarvis\b/i.test(command)) {
-      return;
-    }
+    // Na voz, ignora falas que não contenham o nome Jarvis.
+    if (fromVoice && !/\bjarvis\b/i.test(command)) return;
 
     const clean = command.replace(/\bjarvis\b/gi, "")
       .replace(/[,.!?]/g, " ")
@@ -598,8 +568,7 @@ body[data-mode="speaking"] .ring-inner {
     }
 
     if (/\b(hora|horas|horario)\b/.test(clean)) {
-      const now = new Date();
-      const time = now.toLocaleTimeString("pt-BR", {
+      const time = new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit"
       });
@@ -618,7 +587,7 @@ body[data-mode="speaking"] .ring-inner {
       return;
     }
 
-    if (/\b(quem e voce|seu nome|quem e voce mesmo)\b/.test(clean)) {
+    if (/\b(quem e voce|seu nome)\b/.test(clean)) {
       speak("Sou o Jarvis, seu assistente pessoal.");
       return;
     }
@@ -642,7 +611,7 @@ body[data-mode="speaking"] .ring-inner {
     }
 
     if (/\b(ajuda|o que voce faz|comandos)\b/.test(clean)) {
-      speak("Senhor, posso informar a hora e a data, abrir alguns sites e responder aos comandos básicos. Você também pode digitar seu comando na barra.");
+      speak("Senhor, posso informar a hora e a data, abrir alguns sites e responder a comandos básicos.");
       return;
     }
 
@@ -654,25 +623,14 @@ body[data-mode="speaking"] .ring-inner {
     speak("Entendi, senhor. Ainda não tenho uma ação configurada para esse comando.");
   }
 
-  $("commandForm").addEventListener("submit", event => {
-    event.preventDefault();
-    const text = inputEl.value.trim();
-    if (!text) return;
-
-    inputEl.value = "";
-    answerCommand(text, false);
-  });
-
-  voiceBtn.addEventListener("click", () => {
+  function startListening() {
     if (!SpeechRecognition) {
-      speak("Senhor, o reconhecimento de voz não está disponível neste navegador. Tente abrir o JARVIS no Chrome atualizado e verifique a permissão do microfone.");
+      showResponse("Senhor, o reconhecimento de voz não está disponível neste navegador. Use o Chrome atualizado.");
+      setMode("idle", "Voz indisponível");
       return;
     }
 
-    if (listening && recognition) {
-      recognition.stop();
-      return;
-    }
+    if (listening || restarting) return;
 
     try {
       recognition = new SpeechRecognition();
@@ -683,6 +641,7 @@ body[data-mode="speaking"] .ring-inner {
 
       recognition.onstart = () => {
         listening = true;
+        restarting = false;
         voiceBtn.classList.add("active");
         voiceBtn.textContent = "🎙 VOZ ATIVA";
         setMode("listening", "Escutando, senhor");
@@ -691,22 +650,19 @@ body[data-mode="speaking"] .ring-inner {
       recognition.onresult = event => {
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (!event.results[i].isFinal) continue;
-
           const transcript = event.results[i][0].transcript.trim();
-
-          // Ignora completamente qualquer fala sem "Jarvis".
-          if (!/\bjarvis\b/i.test(transcript)) continue;
-
-          answerCommand(transcript, true);
+          if (/\bjarvis\b/i.test(transcript)) {
+            answerCommand(transcript, true);
+          }
         }
       };
 
       recognition.onerror = event => {
         if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-          showResponse("Senhor, permita o acesso ao microfone nas configurações do Chrome.");
-          setMode("idle", "Microfone sem permissão");
+          showResponse("Senhor, permita o acesso ao microfone nas configurações do Chrome e toque em ATIVAR VOZ.");
+          setMode("idle", "Permissão necessária");
         } else if (event.error !== "no-speech" && event.error !== "aborted") {
-          showResponse("Não consegui reconhecer a voz. Tente novamente, senhor.");
+          showResponse("A escuta foi interrompida. Se necessário, toque em ATIVAR VOZ.");
         }
       };
 
@@ -714,14 +670,45 @@ body[data-mode="speaking"] .ring-inner {
         listening = false;
         voiceBtn.classList.remove("active");
         voiceBtn.textContent = "🎙 ATIVAR VOZ";
-        setMode("idle", "Aguardando, senhor");
+
+        // Tenta reabrir a escuta se ela já havia sido iniciada pelo usuário
+        // ou se o navegador permitiu a inicialização automática.
+        if (autoStartAttempted && !muted && !restarting) {
+          restarting = true;
+          setTimeout(() => {
+            restarting = false;
+            if (!listening && !muted) startListening();
+          }, 900);
+        } else {
+          setMode("idle", "Aguardando, senhor");
+        }
       };
 
       recognition.start();
     } catch (error) {
-      showResponse("Senhor, não foi possível iniciar o microfone. Tente novamente.");
-      setMode("idle", "Aguardando, senhor");
+      listening = false;
+      restarting = false;
+      setMode("idle", "Toque para ativar");
     }
+  }
+
+  $("commandForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const text = inputEl.value.trim();
+    if (!text) return;
+    inputEl.value = "";
+    answerCommand(text, false);
+  });
+
+  voiceBtn.addEventListener("click", () => {
+    if (listening && recognition) {
+      autoStartAttempted = false;
+      recognition.stop();
+      return;
+    }
+
+    autoStartAttempted = true;
+    startListening();
   });
 
   speakBtn.addEventListener("click", () => {
@@ -740,14 +727,17 @@ body[data-mode="speaking"] .ring-inner {
 
     if (muted && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      speaking = false;
-      if (!listening) setMode("idle", "Áudio silenciado");
-    } else {
-      setMode("idle", "Aguardando, senhor");
+    }
+
+    if (muted && listening && recognition) {
+      autoStartAttempted = false;
+      recognition.stop();
+    } else if (!muted) {
+      setMode(listening ? "listening" : "idle",
+        listening ? "Escutando, senhor" : "Aguardando, senhor");
     }
   });
 
-  // Vozes do navegador podem carregar de forma assíncrona.
   if ("speechSynthesis" in window) {
     window.speechSynthesis.getVoices();
     window.speechSynthesis.onvoiceschanged = () => {
@@ -756,6 +746,27 @@ body[data-mode="speaking"] .ring-inner {
   }
 
   setMode("idle", "Aguardando, senhor");
+
+  // Tentativa automática ao abrir. O Chrome pode bloquear esta ação
+  // até que o usuário interaja com a página e autorize o microfone.
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      if (!autoStartAttempted && !listening && !muted) {
+        autoStartAttempted = true;
+        startListening();
+      }
+    }, 1200);
+  });
+
+  // Também tenta iniciar se o documento já tiver terminado de carregar.
+  if (document.readyState === "complete") {
+    setTimeout(() => {
+      if (!autoStartAttempted && !listening && !muted) {
+        autoStartAttempted = true;
+        startListening();
+      }
+    }, 1200);
+  }
 })();
 </script>
 </body>
