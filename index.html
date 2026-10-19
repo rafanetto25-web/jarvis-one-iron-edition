@@ -4,259 +4,404 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#08090d">
-<title>JARVIS ONE — IRON EDITION</title>
+<meta name="theme-color" content="#050811">
+<title>JARVIS ONE</title>
+
 <style>
 :root {
-  --red:#ff263d;
-  --gold:#ffc65b;
-  --blue:#67e7ff;
-  --glow:rgba(255,38,61,.65);
+  --red: #ff243f;
+  --blue: #36cfff;
+  --blue2: #176dff;
+  --gold: #ffc45c;
+  --glow: rgba(35, 180, 255, .6);
 }
-* { box-sizing:border-box; }
+
+* { box-sizing: border-box; }
+
 body {
-  margin:0;
-  min-height:100vh;
-  overflow-x:hidden;
-  color:#e9f7ff;
-  font-family:Arial,sans-serif;
-  background:radial-gradient(circle at 50% 35%,#20202b 0,#090a10 48%,#030407 100%);
-  transition:background .4s;
+  margin: 0;
+  min-height: 100vh;
+  color: #edf8ff;
+  font-family: Arial, sans-serif;
+  background:
+    radial-gradient(ellipse at 50% 35%, #111a2b 0%, #080b14 48%, #020307 100%);
+  overflow-x: hidden;
 }
-body[data-mode="listening"] {
-  --glow:rgba(103,231,255,.8);
-  --red:#67e7ff;
-}
-body[data-mode="thinking"] {
-  --glow:rgba(255,198,91,.8);
-}
+
 header {
-  padding:22px 12px 8px;
-  text-align:center;
-  letter-spacing:4px;
-  font-size:19px;
-  font-weight:bold;
-  color:var(--gold);
+  text-align: center;
+  padding: 22px 10px 8px;
+  color: #7edfff;
+  font-size: 21px;
+  font-weight: bold;
+  letter-spacing: 5px;
+  text-shadow: 0 0 15px #36cfff55;
 }
+
 header small {
-  display:block;
-  color:#8a9aa9;
-  font-size:10px;
-  letter-spacing:4px;
-  margin-top:8px;
+  display: block;
+  color: #788da5;
+  font-size: 9px;
+  letter-spacing: 3px;
+  margin-top: 8px;
 }
+
 .status {
-  display:flex;
-  justify-content:center;
-  gap:9px;
-  align-items:center;
-  margin:22px 0;
-  color:#9cecff;
-  font-size:11px;
-  letter-spacing:2px;
-  text-align:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin: 19px 0 0;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #8cdbff;
+  text-align: center;
 }
+
 .dot {
-  width:7px;
-  height:7px;
-  flex-shrink:0;
-  border-radius:50%;
-  background:#40ffc0;
-  box-shadow:0 0 12px #40ffc0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #42ffc0;
+  box-shadow: 0 0 12px #42ffc0;
 }
-body[data-mode="listening"] .dot {
-  background:var(--blue);
-  box-shadow:0 0 15px var(--blue);
-  animation:blink .7s infinite alternate;
+
+body[data-mode="listening"] .dot,
+body[data-mode="speaking"] .dot {
+  background: var(--blue);
+  box-shadow: 0 0 14px var(--blue);
+  animation: blink .5s infinite alternate;
 }
+
 body[data-mode="thinking"] .dot {
-  background:var(--gold);
-  box-shadow:0 0 15px var(--gold);
-  animation:blink .5s infinite alternate;
+  background: var(--gold);
+  box-shadow: 0 0 14px var(--gold);
+  animation: blink .4s infinite alternate;
 }
+
+/* ÁREA DO NÚCLEO */
+
 .core-area {
-  height: min(82vw,350px);
-  min-height:275px;
-  display:grid;
-  place-items:center;
-  position:relative;
-  overflow:hidden;
+  height: clamp(290px, 84vw, 355px);
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
+
 .core {
-  width:min(70vw,260px);
-  aspect-ratio:1;
-  position:relative;
-  display:grid;
-  place-items:center;
-  filter:drop-shadow(0 0 20px var(--glow));
-  transition:filter .3s;
+  width: clamp(210px, 61vw, 250px);
+  aspect-ratio: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 20px var(--glow));
+  transition: filter .3s;
 }
+
+.core::before,
+.core::after {
+  content: "";
+  position: absolute;
+  width: 118%;
+  height: 1px;
+  background: linear-gradient(
+    90deg, transparent, var(--blue), transparent
+  );
+  opacity: .55;
+}
+
+.core::after {
+  transform: rotate(90deg);
+}
+
 .ring {
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  border:2px solid transparent;
-  border-top-color:var(--red);
-  border-bottom-color:var(--gold);
-  animation:spin 5s linear infinite;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--blue);
+  border-bottom-color: var(--blue2);
+  box-shadow: 0 0 10px #168fff20;
+  animation: spin 5s linear infinite;
 }
+
 .ring.r2 {
-  inset:6%;
-  border-width:1px;
-  border-left-color:var(--blue);
-  border-right-color:var(--gold);
-  animation:spin 3s linear infinite reverse;
+  inset: 5%;
+  border-width: 1px;
+  border-left-color: #65eaff;
+  border-right-color: #2479ff;
+  animation-duration: 3s;
+  animation-direction: reverse;
 }
+
 .ring.r3 {
-  inset:13%;
-  border:1px dashed #ff526b;
-  animation:spin 12s linear infinite;
+  inset: 12%;
+  border: 1px dashed #39cfff;
+  animation-duration: 11s;
 }
+
 .ring.r4 {
-  inset:21%;
-  border:1px solid #ff263d66;
-  border-left-color:var(--gold);
-  border-right-color:var(--blue);
-  animation:spin 2s linear infinite;
+  inset: 19%;
+  border: 2px solid transparent;
+  border-top-color: #9af3ff;
+  border-bottom-color: #176dff;
+  animation-duration: 2s;
+  animation-direction: reverse;
 }
+
+.ring.r5 {
+  inset: 26%;
+  border: 1px solid #36cfff88;
+  border-left-color: #8deeff;
+  border-right-color: #176dff;
+  animation-duration: 7s;
+}
+
 .scan {
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background:conic-gradient(from 0deg,transparent 0deg,transparent 275deg,#ff263d55 330deg,transparent 360deg);
-  animation:spin 4s linear infinite;
-  -webkit-mask:radial-gradient(circle,transparent 58%,#000 60%,#000 62%,transparent 64%);
-  mask:radial-gradient(circle,transparent 58%,#000 60%,#000 62%,transparent 64%);
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 280deg,
+    #36cfff77 330deg,
+    transparent 360deg
+  );
+  animation: spin 4s linear infinite;
+  -webkit-mask: radial-gradient(
+    circle, transparent 57%, #000 59%, #000 62%, transparent 64%
+  );
+  mask: radial-gradient(
+    circle, transparent 57%, #000 59%, #000 62%, transparent 64%
+  );
 }
+
+/* CENTRO VERMELHO */
+
 .core-center {
-  width:52%;
-  aspect-ratio:1;
-  border-radius:50%;
-  position:relative;
-  background:radial-gradient(circle,#fff4ca 0,#ffb62d 12%,#f23b30 35%,#51121e 68%,#080a10 72%);
-  box-shadow:0 0 25px #ff3939,0 0 65px #ff5d2840,inset 0 0 18px #fff5bb66;
-  animation:pulse 2s ease-in-out infinite;
-  transition:filter .25s;
+  position: relative;
+  z-index: 2;
+  width: 43%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    #ffb7bd 8%,
+    #ff263f 25%,
+    #d0002d 45%,
+    #650b28 68%,
+    #080b16 74%
+  );
+  box-shadow:
+    0 0 12px #ff263f,
+    0 0 28px #ff243f,
+    0 0 58px #ff183866,
+    inset 0 0 17px #ffffff80;
+  animation: pulse 2s ease-in-out infinite;
 }
+
+.core-center::before {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px solid #ffb7c5aa;
+  border-radius: 50%;
+  box-shadow: 0 0 13px #ff263f99;
+}
+
 .core-center::after {
-  content:"";
-  position:absolute;
-  inset:12%;
-  border:1px solid #fff7d877;
-  border-radius:50%;
-  box-shadow:0 0 15px #ffb62d88;
+  content: "";
+  position: absolute;
+  inset: 28%;
+  border: 2px solid #ff7888;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff263f;
 }
-.core::before,.core::after {
-  content:"";
-  position:absolute;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  height:1px;
-  width:115%;
-  opacity:.55;
-}
-.core::after { transform:rotate(90deg); }
+
+/* ANIMAÇÃO DURANTE A FALA */
+
 body[data-mode="speaking"] .core {
-  animation:reactive .48s ease-in-out infinite alternate;
+  animation: react .4s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 32px #36cfff);
 }
+
 body[data-mode="speaking"] .core-center {
-  animation:pulse .42s ease-in-out infinite;
-  filter:brightness(1.35);
+  animation: pulse .38s ease-in-out infinite;
+  filter: brightness(1.55);
 }
+
+body[data-mode="speaking"] .ring {
+  animation-duration: 1.5s;
+}
+
+body[data-mode="speaking"] .ring.r2 {
+  animation-duration: .9s;
+}
+
+body[data-mode="speaking"] .ring.r3 {
+  animation-duration: 3s;
+}
+
 body[data-mode="listening"] .core-center {
-  animation:pulse .8s ease-in-out infinite;
+  animation: pulse .8s ease-in-out infinite;
 }
+
+body[data-mode="listening"] .core {
+  filter: drop-shadow(0 0 27px #36cfff);
+}
+
 body[data-mode="thinking"] .core-center {
-  animation:pulse .55s ease-in-out infinite;
-  filter:hue-rotate(18deg) brightness(1.25);
+  animation: pulse .55s ease-in-out infinite;
+  filter: brightness(1.3);
 }
-@keyframes spin { to { transform:rotate(360deg); } }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes pulse {
-  50% { transform:scale(1.09); filter:brightness(1.35); }
+  50% {
+    transform: scale(1.12);
+    filter: brightness(1.5);
+  }
 }
-@keyframes reactive {
-  from { transform:scale(.98); }
-  to { transform:scale(1.045); }
+
+@keyframes react {
+  from { scale: .98; }
+  to { scale: 1.035; }
 }
-@keyframes blink { to { opacity:.35; } }
-.section { text-align:center; margin:0 20px; }
+
+@keyframes blink {
+  to { opacity: .3; }
+}
+
+/* TEXTO */
+
+.section {
+  text-align: center;
+  margin: 0 18px;
+}
+
 h1 {
-  font-size:23px;
-  letter-spacing:5px;
-  margin:0;
-  color:#fff;
+  font-size: 24px;
+  letter-spacing: 5px;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 15px #36cfff35;
 }
+
 .subtitle {
-  font-size:10px;
-  color:var(--blue);
-  letter-spacing:3px;
-  margin:10px 0 22px;
+  color: #64dfff;
+  font-size: 10px;
+  letter-spacing: 3px;
+  margin: 10px 0 20px;
 }
+
 #reply {
-  font-size:15px;
-  color:#c6d9e6;
-  line-height:1.6;
-  min-height:48px;
-  padding:0 12px;
-  overflow-wrap:anywhere;
+  min-height: 52px;
+  padding: 0 8px;
+  color: #c4d8e8;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
+
+/* BOTÕES */
+
 .controls {
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:22px 14px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 20px 12px;
 }
+
 button {
-  border:1px solid #a33a45;
-  background:linear-gradient(145deg,#24121a,#0c0d13);
-  color:#fff;
-  border-radius:13px;
-  padding:14px 16px;
-  font-size:13px;
-  letter-spacing:1px;
-  cursor:pointer;
+  padding: 13px 14px;
+  color: white;
+  font-size: 12px;
+  letter-spacing: .5px;
+  border: 1px solid #236b91;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #101c30, #090d16);
+  cursor: pointer;
+  touch-action: manipulation;
 }
-button:active { transform:scale(.96); }
+
+button:active {
+  transform: scale(.96);
+}
+
 button.primary {
-  background:linear-gradient(135deg,#b8182c,#4e111e);
-  border-color:var(--red);
-  box-shadow:0 0 20px #ff263d25;
+  border-color: #239ee7;
+  background: linear-gradient(135deg, #135b9c, #10203c);
+  box-shadow: 0 0 15px #168fff20;
 }
-input {
-  width:100%;
-  min-width:0;
-  background:#0b1119;
-  border:1px solid #334655;
-  color:white;
-  padding:15px;
-  border-radius:10px;
-  font-size:15px;
-  outline:none;
-}
-input:focus { border-color:var(--red); }
+
+/* BARRA PARA ESCREVER */
+
 .inputrow {
-  display:flex;
-  justify-content:center;
-  gap:7px;
-  margin:0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 14px;
 }
-.inputrow button { padding:12px 16px; }
+
+input {
+  width: 100%;
+  min-width: 0;
+  padding: 15px 13px;
+  border: 1px solid #28516c;
+  border-radius: 12px;
+  outline: none;
+  background: #0b111c;
+  color: white;
+  font-size: 15px;
+}
+
+input::placeholder {
+  color: #7f91a6;
+}
+
+input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 12px #36cfff20;
+}
+
+.inputrow button {
+  min-width: 48px;
+  padding: 14px;
+  font-size: 18px;
+}
+
 footer {
-  text-align:center;
-  font-size:9px;
-  letter-spacing:2px;
-  color:#71808f;
-  margin:32px 0 18px;
+  text-align: center;
+  color: #657a91;
+  font-size: 9px;
+  letter-spacing: 2px;
+  margin: 29px 0 18px;
 }
-@media(prefers-reduced-motion:reduce) {
-  *,*::before,*::after {
-    animation-duration:4s !important;
-    scroll-behavior:auto !important;
+
+@media (max-width: 360px) {
+  .core-area { height: 290px; }
+  .core { width: 205px; }
+  button { padding: 12px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring, .scan, .core-center {
+    animation-duration: 4s !important;
   }
 }
 </style>
 </head>
+
 <body data-mode="ready">
+
 <header>
   J.A.R.V.I.S.
   <small>JUST A RATHER VERY INTELLIGENT SYSTEM</small>
@@ -264,15 +409,16 @@ footer {
 
 <div class="status">
   <span class="dot"></span>
-  <span id="status">SISTEMA INICIALIZADO</span>
+  <span id="status">SISTEMA PRONTO</span>
 </div>
 
 <div class="core-area">
-  <div class="core" aria-label="Núcleo animado do Jarvis">
+  <div class="core" aria-label="Núcleo energético do JARVIS">
     <div class="ring"></div>
     <div class="ring r2"></div>
     <div class="ring r3"></div>
     <div class="ring r4"></div>
+    <div class="ring r5"></div>
     <div class="scan"></div>
     <div class="core-center"></div>
   </div>
@@ -280,9 +426,9 @@ footer {
 
 <section class="section">
   <h1>JARVIS ONE</h1>
-  <div class="subtitle">IRON EDITION · VOZ REATIVA</div>
+  <div class="subtitle">ENERGY CORE · VOZ REATIVA</div>
   <div id="reply" aria-live="polite">
-    Bom dia. JARVIS ONE inicializado. Como posso ajudar?
+    Olá, senhor. Estou aqui.
   </div>
 </section>
 
@@ -297,17 +443,17 @@ footer {
   <button class="primary" id="send" aria-label="Enviar comando">➤</button>
 </div>
 
-<footer>JARVIS ONE · IRON EDITION · SISTEMA REATIVO</footer>
+<footer>JARVIS ONE · ENERGY CORE · SISTEMA REATIVO</footer>
 
 <script>
 const reply = document.getElementById('reply');
 const status = document.getElementById('status');
 const input = document.getElementById('command');
 
-let lastReply = 'JARVIS ONE inicializado. Como posso ajudar?';
+let lastReply = 'Olá, senhor. Estou aqui.';
 let recognition = null;
 let speaking = false;
-let statusBeforeSpeech = 'SISTEMA PRONTO';
+let listening = false;
 
 function setMode(mode, label) {
   document.body.dataset.mode = mode;
@@ -328,7 +474,7 @@ function say(text) {
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = 'pt-BR';
   utter.rate = 1;
-  utter.pitch = 0.92;
+  utter.pitch = .92;
 
   utter.onstart = () => {
     speaking = true;
@@ -337,12 +483,14 @@ function say(text) {
 
   utter.onend = () => {
     speaking = false;
-    setMode('ready', 'SISTEMA PRONTO');
+    setMode(listening ? 'listening' : 'ready',
+      listening ? 'OUVINDO VOCÊ...' : 'SISTEMA PRONTO');
   };
 
   utter.onerror = () => {
     speaking = false;
-    setMode('ready', 'SISTEMA PRONTO');
+    setMode(listening ? 'listening' : 'ready',
+      listening ? 'OUVINDO VOCÊ...' : 'SISTEMA PRONTO');
   };
 
   speechSynthesis.speak(utter);
@@ -356,33 +504,44 @@ function command(raw) {
 
   if (c.includes('hora')) {
     say('Agora são ' + new Date().toLocaleTimeString('pt-BR', {
-      hour:'2-digit', minute:'2-digit'
+      hour: '2-digit',
+      minute: '2-digit'
     }));
+
   } else if (c.includes('data') || c.includes('dia de hoje')) {
     say('Hoje é ' + new Date().toLocaleDateString('pt-BR', {
-      weekday:'long', day:'numeric', month:'long', year:'numeric'
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     }));
+
   } else if (
     c.includes('quem é você') ||
     c.includes('quem e voce') ||
     c.includes('jarvis')
   ) {
-    say('Sou o JARVIS ONE, sua interface assistente. Estou pronto para receber seus comandos.');
+    say('Olá, senhor, estou aqui.');
+
   } else if (c.includes('abrir youtube')) {
     say('Abrindo o YouTube no navegador.');
     window.open('https://m.youtube.com/', '_blank');
+
   } else if (c.includes('abrir google') || c.includes('pesquisar')) {
     say('Abrindo a pesquisa do Google.');
     window.open('https://www.google.com/', '_blank');
+
   } else if (
     c.includes('olá') ||
     c.includes('ola') ||
     c.includes('bom dia') ||
     c.includes('boa noite')
   ) {
-    say('Saudações. Sistemas funcionando. Em que posso ajudar?');
+    say('Saudações, senhor. Estou aqui.');
+
   } else {
-    say('Comando recebido: ' + raw + '. Ainda estou aprendendo novas funções. Você pode perguntar a hora, a data ou pedir para abrir o YouTube.');
+    say('Comando recebido: ' + raw +
+      '. Ainda estou aprendendo novas funções. Você pode perguntar a hora, a data ou pedir para abrir o YouTube.');
   }
 }
 
@@ -404,8 +563,10 @@ document.getElementById('speak').addEventListener('click', () => {
 
 document.getElementById('stop').addEventListener('click', () => {
   if ('speechSynthesis' in window) speechSynthesis.cancel();
+
   speaking = false;
-  setMode('ready', 'ÁUDIO SILENCIADO');
+  setMode(listening ? 'listening' : 'ready',
+    listening ? 'OUVINDO VOCÊ...' : 'ÁUDIO SILENCIADO');
 });
 
 const SpeechRecognition =
@@ -427,34 +588,37 @@ document.getElementById('voice').addEventListener('click', () => {
   recognition.maxAlternatives = 1;
 
   recognition.onstart = () => {
-    statusBeforeSpeech = status.textContent;
+    listening = true;
     setMode('listening', 'OUVINDO VOCÊ...');
     reply.textContent = 'Pode falar. Estou ouvindo.';
   };
 
   recognition.onresult = event => {
+    listening = false;
     command(event.results[0][0].transcript);
   };
 
   recognition.onerror = () => {
+    listening = false;
     setMode('ready', 'VOZ INDISPONÍVEL');
     reply.textContent = 'Não consegui reconhecer a voz. Confira a permissão do microfone e tente novamente.';
   };
 
   recognition.onend = () => {
-    if (document.body.dataset.mode === 'listening') {
-      setMode('ready', 'SISTEMA PRONTO');
-    }
+    listening = false;
+    if (!speaking) setMode('ready', 'SISTEMA PRONTO');
   };
 
   try {
     recognition.start();
   } catch (error) {
+    listening = false;
     setMode('ready', 'TENTE NOVAMENTE');
   }
 });
 
 setMode('ready', 'SISTEMA PRONTO');
 </script>
+
 </body>
 </html>
