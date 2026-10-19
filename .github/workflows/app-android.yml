@@ -22,7 +22,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Corrigir nomes das pastas e arquivos
+      - name: Corrigir nomes
         shell: bash
         run: |
           if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
@@ -41,7 +41,7 @@ jobs:
             mv app/Build.gradle app/build.gradle
           fi
 
-      - name: Conferir arquivos
+      - name: Verificar estrutura
         shell: bash
         run: |
           echo "=== ARQUIVOS ==="
@@ -52,16 +52,10 @@ jobs:
           test -f app/build.gradle
           test -f app/src/main/AndroidManifest.xml
 
-      - name: Conferir configuracoes Gradle
-        shell: bash
-        run: |
-          echo "=== SETTINGS ==="
-          cat settings.gradle
-
-          echo "=== BUILD PRINCIPAL ==="
+          echo "=== CONFIGURACAO PRINCIPAL ==="
           cat build.gradle
 
-          echo "=== BUILD DO APP ==="
+          echo "=== CONFIGURACAO DO APP ==="
           cat app/build.gradle
 
       - name: Instalar Gradle
@@ -74,7 +68,7 @@ jobs:
           gradle wrapper --gradle-version 8.9
           chmod +x gradlew
 
-      - name: Verificar plugin Android
+      - name: Verificar tarefas Android
         run: ./gradlew :app:tasks --all --no-daemon
 
       - name: Compilar APK
