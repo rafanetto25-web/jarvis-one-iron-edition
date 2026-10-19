@@ -3,6 +3,8 @@ name: JARVIS ONE - IRON EDITION
 on:
 workflow_dispatch:
 push:
+branches:
+- main
 
 permissions:
 contents: read
