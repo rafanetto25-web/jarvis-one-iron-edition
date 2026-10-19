@@ -27,15 +27,12 @@ steps:
       if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
         mv Build.gradle build.gradle
       fi
-
       if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then
         mv Settings.gradle settings.gradle
       fi
-
       if [ -d App ] && [ ! -d app ]; then
         mv App app
       fi
-
       if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then
         mv app/Build.gradle app/build.gradle
       fi
