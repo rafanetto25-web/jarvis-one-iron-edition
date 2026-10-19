@@ -1,82 +1,80 @@
-
 name: JARVIS ONE - IRON EDITION
 
 on:
-  workflow_dispatch:
-  push:
+workflow_dispatch:
+push:
 
 permissions:
-  contents: read
+contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Baixar projeto
-        uses: actions/checkout@v4
+steps:
+  - name: Baixar projeto
+    uses: actions/checkout@v4
 
-      - name: Preparar Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+  - name: Preparar Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: "17"
 
-      - name: Corrigir nomes dos arquivos
-        shell: bash
-        run: |
-          if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
-            mv Build.gradle build.gradle
-          fi
+  - name: Corrigir nomes dos arquivos
+    shell: bash
+    run: |
+      if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
+        mv Build.gradle build.gradle
+      fi
 
-          if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then
-            mv Settings.gradle settings.gradle
-          fi
+      if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then
+        mv Settings.gradle settings.gradle
+      fi
 
-          if [ -d App ] && [ ! -d app ]; then
-            mv App app
-          fi
+      if [ -d App ] && [ ! -d app ]; then
+        mv App app
+      fi
 
-          if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then
-            mv app/Build.gradle app/build.gradle
-          fi
+      if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then
+        mv app/Build.gradle app/build.gradle
+      fi
 
-      - name: Conferir arquivos
-        shell: bash
-        run: |
-          echo "=== ARQUIVOS ==="
-          find . -maxdepth 7 -type f | sort
-          echo "=== BUILD PRINCIPAL ==="
-          cat build.gradle
-          echo "=== SETTINGS ==="
-          cat settings.gradle
-          echo "=== BUILD DO APP ==="
-          cat app/build.gradle
+  - name: Conferir arquivos
+    shell: bash
+    run: |
+      find . -maxdepth 7 -type f | sort
+      test -f settings.gradle
+      test -f build.gradle
+      test -f app/build.gradle
+      test -f app/src/main/AndroidManifest.xml
 
-          test -f settings.gradle
-          test -f build.gradle
-          test -f app/build.gradle
-          test -f app/src/main/AndroidManifest.xml
+  - name: Instalar Gradle
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: "8.9"
 
-      - name: Instalar Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
+  - name: Criar Gradle Wrapper
+    run: |
+      gradle wrapper --gradle-version 8.9
+      chmod +x gradlew
 
-      - name: Criar Gradle Wrapper
-        run: |
-          gradle wrapper --gradle-version 8.9
-          chmod +x gradlew
+  - name: Conferir tarefas Android
+    run: ./gradlew :app:tasks --all --no-daemon
 
-      - name: Conferir tarefas Android
-        run: ./gradlew :app:tasks --all --no-daemon
+  - name: Compilar APK
+    run: ./gradlew :app:assembleDebug --no-daemon
 
-      - name: Compilar APK
-        run: ./gradlew :app:assembleDebug --no-daemon
+  - name: Localizar APK gerado
+    shell: bash
+    run: |
+      echo "Procurando arquivos APK..."
+      find app/build/outputs -type f -name "*.apk"
+      test -n "$(find app/build/outputs -type f -name '*.apk' -print -quit)"
 
-      - name: Publicar APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: JARVIS-ONE-IRON-EDITION-APK
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+  - name: Publicar APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: JARVIS-ONE-IRON-EDITION-APK
+      path: app/build/outputs/apk/debug/*.apk
+      if-no-files-found: error
