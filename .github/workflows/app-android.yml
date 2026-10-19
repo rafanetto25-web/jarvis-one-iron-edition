@@ -1,17 +1,88 @@
 
-plugins {
-    id 'com.android.application'
-}
+name: JARVIS ONE - IRON EDITION
 
-android {
-    namespace 'com.jarvisone.iron'
-    compileSdk 35
+on:
+  workflow_dispatch:
+  push:
 
-    defaultConfig {
-        applicationId 'com.jarvisone.iron'
-        minSdk 23
-        targetSdk 35
-        versionCode 1
-        versionName '1.0'
-    }
-}
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Corrigir nomes das pastas e arquivos
+        shell: bash
+        run: |
+          if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
+            mv Build.gradle build.gradle
+          fi
+
+          if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then
+            mv Settings.gradle settings.gradle
+          fi
+
+          if [ -d App ] && [ ! -d app ]; then
+            mv App app
+          fi
+
+          if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then
+            mv app/Build.gradle app/build.gradle
+          fi
+
+      - name: Conferir arquivos
+        shell: bash
+        run: |
+          echo "=== ARQUIVOS ==="
+          find . -maxdepth 7 -type f | sort
+
+          test -f settings.gradle
+          test -f build.gradle
+          test -f app/build.gradle
+          test -f app/src/main/AndroidManifest.xml
+
+      - name: Conferir configuracoes Gradle
+        shell: bash
+        run: |
+          echo "=== SETTINGS ==="
+          cat settings.gradle
+
+          echo "=== BUILD PRINCIPAL ==="
+          cat build.gradle
+
+          echo "=== BUILD DO APP ==="
+          cat app/build.gradle
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Criar Gradle Wrapper
+        run: |
+          gradle wrapper --gradle-version 8.9
+          chmod +x gradlew
+
+      - name: Verificar plugin Android
+        run: ./gradlew :app:tasks --all --no-daemon
+
+      - name: Compilar APK
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: JARVIS-ONE-IRON-EDITION-APK
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
