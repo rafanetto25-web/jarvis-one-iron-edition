@@ -1,143 +1,96 @@
-
 name: JARVIS ONE - IRON EDITION
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+workflow_dispatch:
+push:
+branches:
+- main
+- rafanetto25-web-patch-1
 
 permissions:
-  contents: read
-  actions: read
+contents: read
 
 jobs:
-  build:
-    name: Compilar e publicar APK
-    runs-on: ubuntu-latest
+build:
+name: Compilar APK Android
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Baixar projeto
-        uses: actions/checkout@v4
+steps:
+  - name: Baixar projeto
+    uses: actions/checkout@v4
 
-      - name: Preparar Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
+  - name: Preparar Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: "17"
 
-      - name: Corrigir nomes dos arquivos
-        shell: bash
-        run: |
-          if [ -f Build.gradle ] && [ ! -f build.gradle ]; then
-            mv Build.gradle build.gradle
-          fi
+  - name: Conferir arquivos na raiz
+    shell: bash
+    run: |
+      echo "Diretório atual:"
+      pwd
+      echo "Arquivos da raiz:"
+      ls -la
+      echo "Arquivos Gradle encontrados:"
+      find . -maxdepth 3 \( -name "settings.gradle" -o -name "build.gradle" -o -name "gradlew" \) -print
 
-          if [ -f Settings.gradle ] && [ ! -f settings.gradle ]; then
-            mv Settings.gradle settings.gradle
-          fi
+      if [ ! -f settings.gradle ]; then
+        echo "::error::settings.gradle não encontrado na raiz."
+        exit 1
+      fi
 
-          if [ -d App ] && [ ! -d app ]; then
-            mv App app
-          fi
+      if [ ! -f build.gradle ]; then
+        echo "::error::build.gradle não encontrado na raiz."
+        exit 1
+      fi
 
-          if [ -f app/Build.gradle ] && [ ! -f app/build.gradle ]; then
-            mv app/Build.gradle app/build.gradle
-          fi
+      if [ ! -f app/build.gradle ]; then
+        echo "::error::app/build.gradle não encontrado."
+        exit 1
+      fi
 
-      - name: Conferir arquivos do projeto
-        shell: bash
-        run: |
-          set -e
-          test -f settings.gradle
-          test -f build.gradle
-          test -f app/build.gradle
-          test -f app/src/main/AndroidManifest.xml
+      if [ ! -f app/src/main/AndroidManifest.xml ]; then
+        echo "::error::AndroidManifest.xml não encontrado."
+        exit 1
+      fi
 
-      - name: Instalar Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
+  - name: Preparar Gradle
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: "8.9"
 
-      - name: Criar Gradle Wrapper
-        shell: bash
-        run: |
-          gradle wrapper --gradle-version 8.9
-          chmod +x gradlew
+  - name: Criar Wrapper
+    shell: bash
+    run: |
+      gradle wrapper --gradle-version 8.9
+      chmod +x gradlew
 
-      - name: Compilar APK Debug
-        shell: bash
-        run: |
-          set -e
-          ./gradlew :app:assembleDebug --no-daemon
+  - name: Compilar APK
+    shell: bash
+    run: |
+      ./gradlew :app:assembleDebug --no-daemon
 
-      - name: Verificar APK gerado
-        shell: bash
-        run: |
-          set -e
+  - name: Conferir APK
+    shell: bash
+    run: |
+      APK="app/build/outputs/apk/debug/app-debug.apk"
 
-          APK="app/build/outputs/apk/debug/app-debug.apk"
+      if [ ! -s "$APK" ]; then
+        echo "::error::APK não foi gerado ou está vazio."
+        find . -type f -name "*.apk" -print || true
+        exit 1
+      fi
 
-          if [ ! -f "$APK" ]; then
-            echo "::error::APK não encontrado em $APK"
-            echo "Arquivos APK encontrados:"
-            find . -type f -name "*.apk" -print || true
-            exit 1
-          fi
+      echo "APK gerado:"
+      ls -lh "$APK"
+      unzip -t "$APK"
 
-          echo "APK encontrado:"
-          ls -lh "$APK"
-
-          SIZE=$(stat -c%s "$APK")
-          echo "Tamanho do APK: $SIZE bytes"
-
-          if [ "$SIZE" -lt 50000 ]; then
-            echo "::warning::APK muito pequeno. Verifique se o projeto contém o aplicativo completo."
-          fi
-
-          echo "apk_path=$APK" >> "$GITHUB_ENV"
-
-      - name: Validar estrutura do APK
-        shell: bash
-        run: |
-          set -e
-
-          APK="app/build/outputs/apk/debug/app-debug.apk"
-
-          if ! unzip -t "$APK"; then
-            echo "::error::O arquivo APK não é um ZIP válido."
-            exit 1
-          fi
-
-          if ! unzip -l "$APK" | grep -q "AndroidManifest.xml"; then
-            echo "::error::AndroidManifest.xml não encontrado dentro do APK."
-            exit 1
-          fi
-
-          echo "Estrutura ZIP e manifesto encontrados."
-
-      - name: Publicar APK para download - ARTIFACTS
-        uses: actions/upload-artifact@v4
-        with:
-          name: JARVIS-ONE-IRON-EDITION-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 7
-          compression-level: 0
-
-      - name: Resumo do build
-        if: success()
-        shell: bash
-        run: |
-          {
-            echo "## JARVIS ONE - IRON EDITION"
-            echo ""
-            echo "Build concluído e APK publicado em Artifacts."
-            echo ""
-            echo "- **Arquivo:** app-debug.apk"
-            echo "- **Download:** seção Artifacts desta execução"
-            echo "- **Retenção:** 7 dias"
-            echo ""
-            echo "O APK deve ser testado em um dispositivo Android."
-          } >> "$GITHUB_STEP_SUMMARY"
+  - name: Publicar APK para download
+    uses: actions/upload-artifact@v4
+    with:
+      name: JARVIS-ONE-IRON-EDITION-APK
+      path: app/build/outputs/apk/debug/app-debug.apk
+      if-no-files-found: error
+      retention-days: 7
+      compression-level: 0
