@@ -28,30 +28,13 @@ steps:
   - name: Conferir arquivos na raiz
     shell: bash
     run: |
-      echo "Diretório atual:"
       pwd
-      echo "Arquivos da raiz:"
       ls -la
 
-      if [ ! -f settings.gradle ]; then
-        echo "::error::settings.gradle não encontrado na raiz."
-        exit 1
-      fi
-
-      if [ ! -f build.gradle ]; then
-        echo "::error::build.gradle não encontrado na raiz."
-        exit 1
-      fi
-
-      if [ ! -f app/build.gradle ]; then
-        echo "::error::app/build.gradle não encontrado."
-        exit 1
-      fi
-
-      if [ ! -f app/src/main/AndroidManifest.xml ]; then
-        echo "::error::AndroidManifest.xml não encontrado."
-        exit 1
-      fi
+      test -f settings.gradle || { echo "::error::settings.gradle não encontrado"; exit 1; }
+      test -f build.gradle || { echo "::error::build.gradle não encontrado"; exit 1; }
+      test -f app/build.gradle || { echo "::error::app/build.gradle não encontrado"; exit 1; }
+      test -f app/src/main/AndroidManifest.xml || { echo "::error::AndroidManifest.xml não encontrado"; exit 1; }
 
   - name: Preparar Gradle
     uses: gradle/actions/setup-gradle@v4
@@ -75,7 +58,6 @@ steps:
         exit 1
       fi
 
-      echo "APK gerado:"
       ls -lh "$APK"
       unzip -t "$APK"
 
