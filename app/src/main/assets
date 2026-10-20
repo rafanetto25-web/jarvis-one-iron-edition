@@ -19,8 +19,7 @@ body {
   margin: 0;
   min-height: 100vh;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at center, #21101b 0%, #0b0c16 43%, #05060b 100%);
+  background: radial-gradient(ellipse at center, #21101b 0%, #0b0c16 43%, #05060b 100%);
   color: #fff;
   font-family: Arial, sans-serif;
   display: flex;
@@ -117,19 +116,14 @@ main {
 .ring-four {
   inset: 26%;
   background: radial-gradient(circle, #ff687c 0%, #ff263d 26%, #971026 54%, #230713 75%);
-  box-shadow:
-    0 0 18px #ff263d,
-    0 0 42px #ff263d99,
-    0 0 80px #ff263d44,
-    inset 0 0 24px #ffb0a0;
+  box-shadow: 0 0 18px #ff263d, 0 0 42px #ff263d99, 0 0 80px #ff263d44, inset 0 0 24px #ffb0a0;
   animation: pulse 2.5s ease-in-out infinite;
 }
 .core-glass {
   position: absolute;
   inset: 31%;
   border-radius: 50%;
-  background:
-    radial-gradient(ellipse at 35% 25%, #fff8e7 0%, #ffc65b 7%, #ff4b3c 23%, #9b102a 49%, #210916 76%);
+  background: radial-gradient(ellipse at 35% 25%, #fff8e7 0%, #ffc65b 7%, #ff4b3c 23%, #9b102a 49%, #210916 76%);
   border: 2px solid #ffd27a;
   box-shadow: inset 0 0 22px #fff1a566, 0 0 32px #ff263d99;
   animation: pulse 1.8s ease-in-out infinite alternate;
@@ -254,9 +248,7 @@ button:active { transform: scale(.95); }
 </main>
 
 <footer>
-  <div class="message" id="message">
-    Olá, senhor. Estou aqui.
-  </div>
+  <div class="message" id="message">Olá, senhor. Estou aqui.</div>
 
   <form class="command-row" id="commandForm">
     <input id="command" type="text"
@@ -283,6 +275,7 @@ const command = document.getElementById("command");
 
 let voiceEnabled = true;
 let recognition = null;
+let serviceRequested = false;
 
 function setStatus(text) {
   statusEl.textContent = "● " + text;
@@ -307,7 +300,7 @@ function speak(text) {
 
   utterance.onend = () => {
     reactor.classList.remove("speaking");
-    setStatus("SISTEMA PRONTO");
+    setStatus(serviceRequested ? "ESCUTA SOLICITADA" : "SISTEMA PRONTO");
   };
 
   utterance.onerror = () => {
@@ -322,8 +315,7 @@ function respond(text) {
   const normalized = text.toLocaleLowerCase("pt-BR").trim();
 
   if (!normalized.includes("jarvis")) {
-    messageEl.textContent =
-      "Diga meu nome para iniciar, senhor.";
+    messageEl.textContent = "Diga meu nome para iniciar, senhor.";
     return;
   }
 
@@ -335,39 +327,90 @@ function respond(text) {
   } else if (normalized.includes("horas")) {
     speak("Senhor, são " +
       new Date().toLocaleTimeString("pt-BR", {
-        hour: "2-digit", minute: "2-digit"
+        hour: "2-digit",
+        minute: "2-digit"
       }) + ".");
   } else {
     speak("Sim, senhor. Estou ouvindo. Como posso ajudar?");
   }
 }
 
-document.getElementById("commandForm").addEventListener("submit", e => {
-  e.preventDefault();
+/* Recebe comandos enviados pelo serviço Android. */
+window.jarvisReceiveCommand = function(text) {
+  if (typeof text !== "string" || !text.trim()) return;
+  respond(text);
+};
+
+/* Envia comandos digitados. */
+document.getElementById("commandForm").addEventListener("submit", event => {
+  event.preventDefault();
+
   const text = command.value.trim();
   if (!text) return;
+
   command.value = "";
   respond(text);
 });
 
+/* Ativa a fala do assistente. */
 document.getElementById("voice").addEventListener("click", () => {
   voiceEnabled = true;
   speak("Voz ativada, senhor.");
 });
 
+/* Solicita a parada da fala e da escuta. */
 document.getElementById("stop").addEventListener("click", () => {
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  voiceEnabled = false;
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  if (recognition) {
+    try { recognition.stop(); } catch (e) {}
+    recognition = null;
+  }
+
+  if (window.AndroidJarvis) {
+    try {
+      window.AndroidJarvis.stopVoiceService();
+    } catch (e) {
+      console.log("Não foi possível solicitar a parada do serviço.", e);
+    }
+  }
+
+  serviceRequested = false;
   reactor.classList.remove("speaking");
   setStatus("SILENCIADO");
+  messageEl.textContent = "Voz e escuta solicitadas para parar.";
 });
 
+/* Usa o serviço nativo no aplicativo Android.
+   No navegador, mantém o reconhecimento do próprio navegador. */
 document.getElementById("mic").addEventListener("click", () => {
+  voiceEnabled = true;
+
+  if (window.AndroidJarvis) {
+    try {
+      window.AndroidJarvis.startVoiceService();
+      serviceRequested = true;
+      setStatus("ESCUTA SOLICITADA");
+      messageEl.textContent =
+        "Solicitando escuta nativa, senhor.";
+    } catch (e) {
+      setStatus("ERRO AO INICIAR");
+      messageEl.textContent =
+        "Não consegui iniciar a escuta. Verifique a permissão do microfone.";
+    }
+    return;
+  }
+
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
     messageEl.textContent =
-      "Reconhecimento de voz indisponível neste ambiente. Use o campo de texto.";
+      "Reconhecimento de voz indisponível. Use o campo de texto.";
     setStatus("MICROFONE INDISPONÍVEL");
     return;
   }
@@ -382,16 +425,19 @@ document.getElementById("mic").addEventListener("click", () => {
   recognition.interimResults = false;
 
   recognition.onstart = () => setStatus("OUVINDO");
+
   recognition.onresult = event => {
     const heard = event.results[0][0].transcript;
     messageEl.textContent = "Você disse: " + heard;
     respond(heard);
   };
+
   recognition.onerror = () => {
     setStatus("SISTEMA PRONTO");
     messageEl.textContent =
       "Não consegui ouvir, senhor. Tente novamente.";
   };
+
   recognition.onend = () => {
     if (!reactor.classList.contains("speaking")) {
       setStatus("SISTEMA PRONTO");
