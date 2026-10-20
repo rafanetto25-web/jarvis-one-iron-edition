@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -20,10 +22,25 @@ import java.util.Locale;
 
 public class JarvisVoiceService extends Service {
 
+    private static final String TAG = "JARVIS";
     private static final String CHANNEL_ID = "jarvis_voice_channel";
     private static final int NOTIFICATION_ID = 101;
+    private static final String ACTION_START =
+            "com.jarvisone.iron.START_VOICE";
+    private static final String ACTION_STOP =
+            "com.jarvisone.iron.STOP_VOICE";
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private SpeechRecognizer recognizer;
+    private boolean listening = false;
+    private boolean restarting = false;
+    private boolean stopped = false;
+
+    private final Runnable restartListening = () -> {
+        restarting = false;
+        startListening();
+    };
 
     @Override
     public void onCreate() {
@@ -33,21 +50,43 @@ public class JarvisVoiceService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification notification = buildNotification();
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-            );
-        } else {
-            startForeground(NOTIFICATION_ID, notification);
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            stopListeningService();
+            return START_NOT_STICKY;
         }
 
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            Log.e("JARVIS", "Reconhecimento de voz indisponível.");
+        if (Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(
+                        android.Manifest.permission.RECORD_AUDIO)
+                        != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Permissão do microfone não concedida.");
             stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        Notification notification = buildNotification();
+
+        try {
+            if (Build.VERSION.SDK_INT >= 29) {
+                startForeground(
+                        NOTIFICATION_ID,
+                        notification,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                );
+            } else {
+                startForeground(NOTIFICATION_ID, notification);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Não foi possível iniciar o serviço de voz.", e);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        stopped = false;
+
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Log.e(TAG, "Reconhecimento de voz indisponível.");
+            stopListeningService();
             return START_NOT_STICKY;
         }
 
@@ -56,104 +95,212 @@ public class JarvisVoiceService extends Service {
     }
 
     private void startListening() {
-        if (recognizer != null) {
-            recognizer.destroy();
+        if (stopped || listening) {
+            return;
         }
 
-        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Log.e(TAG, "Reconhecimento indisponível.");
+            scheduleRestart(5000);
+            return;
+        }
 
-        recognizer.setRecognitionListener(new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-                Log.i("JARVIS", "Pronto para ouvir.");
+        try {
+            if (recognizer != null) {
+                recognizer.destroy();
+                recognizer = null;
             }
 
-            @Override public void onBeginningOfSpeech() {}
-            @Override public void onRmsChanged(float rmsdB) {}
-            @Override public void onBufferReceived(byte[] buffer) {}
-            @Override public void onEndOfSpeech() {}
+            recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(new RecognitionListener() {
 
-            @Override
-            public void onError(int error) {
-                Log.w("JARVIS", "Reconhecimento encerrado: " + error);
-                stopSelf();
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-                ArrayList<String> falas = results.getStringArrayList(
-                    SpeechRecognizer.RESULTS_RECOGNITION
-                );
-
-                if (falas != null && !falas.isEmpty()) {
-                    String fala = falas.get(0);
-                    Log.i("JARVIS", "Você disse: " + fala);
-
-                    if (fala.toLowerCase(Locale.ROOT).contains("jarvis")) {
-                        Intent abrir = new Intent(
-                            JarvisVoiceService.this,
-                            MainActivity.class
-                        );
-                        abrir.addFlags(
-                            Intent.FLAG_ACTIVITY_NEW_TASK |
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        );
-                        startActivity(abrir);
-                    }
+                @Override
+                public void onReadyForSpeech(Bundle params) {
+                    Log.i(TAG, "Pronto para ouvir.");
                 }
 
-                stopSelf();
-            }
+                @Override
+                public void onBeginningOfSpeech() {
+                    Log.i(TAG, "Fala detectada.");
+                }
 
-            @Override public void onPartialResults(Bundle results) {}
-            @Override public void onEvent(int eventType, Bundle params) {}
-        });
+                @Override
+                public void onRmsChanged(float rmsdB) {}
 
-        Intent pedido = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        pedido.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        );
-        pedido.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR");
+                @Override
+                public void onBufferReceived(byte[] buffer) {}
 
-        recognizer.startListening(pedido);
+                @Override
+                public void onEndOfSpeech() {
+                    Log.i(TAG, "Fim da fala.");
+                }
+
+                @Override
+                public void onError(int error) {
+                    listening = false;
+                    Log.w(TAG, "Erro de reconhecimento: " + error);
+                    scheduleRestart(getRestartDelay(error));
+                }
+
+                @Override
+                public void onResults(Bundle results) {
+                    listening = false;
+
+                    ArrayList<String> falas = results.getStringArrayList(
+                            SpeechRecognizer.RESULTS_RECOGNITION);
+
+                    if (falas != null && !falas.isEmpty()) {
+                        String fala = falas.get(0).trim();
+                        Log.i(TAG, "Fala reconhecida: " + fala);
+
+                        if (containsJarvis(fala)) {
+                            Intent abrir = new Intent(
+                                    JarvisVoiceService.this,
+                                    MainActivity.class);
+
+                            abrir.setAction(
+                                    "com.jarvisone.iron.VOICE_COMMAND");
+                            abrir.putExtra("recognized_text", fala);
+                            abrir.addFlags(
+                                    Intent.FLAG_ACTIVITY_NEW_TASK |
+                                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                            try {
+                                startActivity(abrir);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Não foi possível abrir a interface.", e);
+                            }
+                        }
+                    }
+
+                    scheduleRestart(700);
+                }
+
+                @Override
+                public void onPartialResults(Bundle results) {}
+
+                @Override
+                public void onEvent(int eventType, Bundle params) {}
+            });
+
+            Intent pedido = new Intent(
+                    RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            pedido.putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            pedido.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR");
+            pedido.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "pt-BR");
+            pedido.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+            pedido.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+
+            listening = true;
+            recognizer.startListening(pedido);
+
+        } catch (Exception e) {
+            listening = false;
+            Log.e(TAG, "Falha ao iniciar o reconhecimento.", e);
+            scheduleRestart(3000);
+        }
+    }
+
+    private boolean containsJarvis(String text) {
+        String normalized = text.toLowerCase(Locale.ROOT)
+                .replace("á", "a")
+                .replace("í", "i")
+                .replace("ý", "y");
+
+        return normalized.contains("jarvis");
+    }
+
+    private long getRestartDelay(int error) {
+        switch (error) {
+            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                return 3000;
+            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                return 5000;
+            case SpeechRecognizer.ERROR_NETWORK:
+            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                return 5000;
+            default:
+                return 1200;
+        }
+    }
+
+    private void scheduleRestart(long delay) {
+        if (stopped || restarting) {
+            return;
+        }
+
+        restarting = true;
+        handler.postDelayed(restartListening, delay);
     }
 
     private Notification buildNotification() {
         Notification.Builder builder =
-            Build.VERSION.SDK_INT >= 26
-                ? new Notification.Builder(this, CHANNEL_ID)
-                : new Notification.Builder(this);
+                Build.VERSION.SDK_INT >= 26
+                        ? new Notification.Builder(this, CHANNEL_ID)
+                        : new Notification.Builder(this);
 
         return builder
-            .setContentTitle("JARVIS ONE")
-            .setContentText("Serviço de voz ativo")
-            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setOngoing(true)
-            .build();
+                .setContentTitle("JARVIS ONE")
+                .setContentText("Serviço de voz ativo")
+                .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+                .setOngoing(true)
+                .build();
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationChannel canal = new NotificationChannel(
-                CHANNEL_ID,
-                "Voz do JARVIS",
-                NotificationManager.IMPORTANCE_LOW
-            );
+                    CHANNEL_ID,
+                    "Voz do JARVIS",
+                    NotificationManager.IMPORTANCE_LOW);
 
             NotificationManager gerenciador =
-                getSystemService(NotificationManager.class);
+                    getSystemService(NotificationManager.class);
 
-            gerenciador.createNotificationChannel(canal);
+            if (gerenciador != null) {
+                gerenciador.createNotificationChannel(canal);
+            }
         }
+    }
+
+    private void stopListeningService() {
+        stopped = true;
+        listening = false;
+        handler.removeCallbacksAndMessages(null);
+        restarting = false;
+
+        if (recognizer != null) {
+            try {
+                recognizer.cancel();
+                recognizer.destroy();
+            } catch (Exception e) {
+                Log.w(TAG, "Erro ao encerrar o reconhecimento.", e);
+            }
+            recognizer = null;
+        }
+
+        stopForeground(true);
+        stopSelf();
     }
 
     @Override
     public void onDestroy() {
+        stopped = true;
+        listening = false;
+        handler.removeCallbacksAndMessages(null);
+
         if (recognizer != null) {
-            recognizer.destroy();
+            try {
+                recognizer.cancel();
+                recognizer.destroy();
+            } catch (Exception e) {
+                Log.w(TAG, "Erro ao destruir o reconhecedor.", e);
+            }
             recognizer = null;
         }
+
         super.onDestroy();
     }
 
