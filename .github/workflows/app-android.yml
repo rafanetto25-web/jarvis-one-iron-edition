@@ -32,8 +32,6 @@ steps:
       pwd
       echo "Arquivos da raiz:"
       ls -la
-      echo "Arquivos Gradle encontrados:"
-      find . -maxdepth 3 \( -name "settings.gradle" -o -name "build.gradle" -o -name "gradlew" \) -print
 
       if [ ! -f settings.gradle ]; then
         echo "::error::settings.gradle não encontrado na raiz."
@@ -60,16 +58,11 @@ steps:
     with:
       gradle-version: "8.9"
 
-  - name: Criar Wrapper
-    shell: bash
-    run: |
-      gradle wrapper --gradle-version 8.9
-      chmod +x gradlew
-
   - name: Compilar APK
     shell: bash
     run: |
-      ./gradlew :app:assembleDebug --no-daemon
+      gradle --version
+      gradle --no-daemon :app:assembleDebug
 
   - name: Conferir APK
     shell: bash
