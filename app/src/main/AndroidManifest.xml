@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -9,11 +8,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:theme="@android:style/Theme.Material.NoActionBar"
-        android:label="JARVIS ONE"
-        android:usesCleartextTraffic="false"
         android:allowBackup="false"
-        android:supportsRtl="true">
+        android:label="JARVIS ONE"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.NoActionBar"
+        android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"
@@ -26,11 +25,11 @@
 
         </activity>
 
-        <!-- Serviço de escuta em primeiro plano -->
         <service
             android:name=".JarvisVoiceService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
     </application>
+
 </manifest>
