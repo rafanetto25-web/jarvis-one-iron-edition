@@ -30,7 +30,6 @@ steps:
     run: |
       pwd
       ls -la
-
       test -f settings.gradle || { echo "::error::settings.gradle não encontrado"; exit 1; }
       test -f build.gradle || { echo "::error::build.gradle não encontrado"; exit 1; }
       test -f app/build.gradle || { echo "::error::app/build.gradle não encontrado"; exit 1; }
@@ -43,21 +42,17 @@ steps:
 
   - name: Compilar APK
     shell: bash
-    run: |
-      gradle --version
-      gradle --no-daemon :app:assembleDebug
+    run: gradle --no-daemon :app:assembleDebug
 
   - name: Conferir APK
     shell: bash
     run: |
       APK="app/build/outputs/apk/debug/app-debug.apk"
-
       if [ ! -s "$APK" ]; then
         echo "::error::APK não foi gerado ou está vazio."
         find . -type f -name "*.apk" -print || true
         exit 1
       fi
-
       ls -lh "$APK"
       unzip -t "$APK"
 
