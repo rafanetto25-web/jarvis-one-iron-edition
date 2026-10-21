@@ -1,73 +1,92 @@
-
 name: JARVIS ONE - IRON EDITION
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - rafanetto25-web-patch-1
+workflow_dispatch:
+push:
+branches:
+- main
+- rafanetto25-web-patch-1
 
 permissions:
-  contents: read
+contents: read
 
 jobs:
-  build:
-    name: Compilar APK Android
-    runs-on: ubuntu-latest
+build:
+name: Compilar APK Android
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Baixar projeto
-        uses: actions/checkout@v4
-        with:
-          repository: rafanetto25-web/jarvis-one-iron-edition
-          ref: rafanetto25-web-patch-1
+steps:
+  - name: Baixar projeto
+    uses: actions/checkout@v4
 
-      - name: Preparar Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+  - name: Preparar Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: "17"
 
-      - name: Conferir arquivos
-        shell: bash
-        run: |
-          pwd
-          ls -la
-          test -f settings.gradle
-          test -f build.gradle
-          test -f app/build.gradle
-          test -f app/src/main/AndroidManifest.xml
-          test -f app/src/main/java/com/jarvisone/iron/MainActivity.java
-          test -f app/src/main/java/com/jarvisone/iron/JarvisVoiceService.java
-          test -f app/src/main/assets/index.html
+  - name: Conferir arquivos
+    shell: bash
+    run: |
+      echo "=== BRANCH COMPILADA ==="
+      echo "$GITHUB_REF"
+      echo "=== ARQUIVOS DA RAIZ ==="
+      ls -la
 
-      - name: Preparar Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
+      echo "=== VERIFICAR ARQUIVOS NECESSARIOS ==="
+      missing=0
 
-      - name: Compilar APK
-        shell: bash
-        run: gradle --no-daemon :app:assembleDebug
+      for file in \
+        settings.gradle \
+        build.gradle \
+        app/build.gradle \
+        app/src/main/AndroidManifest.xml \
+        app/src/main/java/com/jarvisone/iron/MainActivity.java \
+        app/src/main/java/com/jarvisone/iron/JarvisVoiceService.java \
+        app/src/main/assets/index.html
+      do
+        if [ -f "$file" ]; then
+          echo "OK: $file"
+        else
+          echo "::warning::Arquivo ausente: $file"
+          missing=1
+        fi
+      done
 
-      - name: Validar APK
-        shell: bash
-        run: |
-          APK="app/build/outputs/apk/debug/app-debug.apk"
-          if [ ! -s "$APK" ]; then
-            echo "::error::APK não encontrado ou vazio"
-            find . -type f -name "*.apk" -print || true
-            exit 1
-          fi
-          ls -lh "$APK"
-          unzip -t "$APK"
+      echo "=== FIM DA CONFERENCIA ==="
+      if [ "$missing" -eq 1 ]; then
+        echo "::warning::Existem arquivos ausentes. A compilacao mostrara se sao necessarios."
+      fi
 
-      - name: Publicar APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: JARVIS-ONE-IRON-EDITION-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 7
-          compression-level: 0
+  - name: Preparar Gradle
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: "8.9"
+
+  - name: Compilar APK
+    shell: bash
+    run: gradle --no-daemon :app:assembleDebug
+
+  - name: Validar APK
+    shell: bash
+    run: |
+      APK="app/build/outputs/apk/debug/app-debug.apk"
+
+      if [ ! -s "$APK" ]; then
+        echo "::error::APK nao encontrado ou vazio"
+        find . -type f -name "*.apk" -print || true
+        exit 1
+      fi
+
+      echo "=== APK GERADO ==="
+      ls -lh "$APK"
+      unzip -t "$APK"
+
+  - name: Publicar APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: JARVIS-ONE-IRON-EDITION-APK
+      path: app/build/outputs/apk/debug/app-debug.apk
+      if-no-files-found: error
+      retention-days: 7
+      compression-level: 0
