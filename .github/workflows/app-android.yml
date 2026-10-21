@@ -1,92 +1,11 @@
-name: JARVIS ONE - IRON EDITION
-
-on:
-workflow_dispatch:
-push:
-branches:
-- main
-- rafanetto25-web-patch-1
-
-permissions:
-contents: read
-
-jobs:
-build:
-name: Compilar APK Android
-runs-on: ubuntu-latest
-
-steps:
-  - name: Baixar projeto
-    uses: actions/checkout@v4
-
-  - name: Preparar Java
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: "17"
-
-  - name: Conferir arquivos
+- name: Compilar APK
     shell: bash
     run: |
-      echo "=== BRANCH COMPILADA ==="
-      echo "$GITHUB_REF"
+      echo "=== DIRETORIO ATUAL ==="
+      pwd
       echo "=== ARQUIVOS DA RAIZ ==="
       ls -la
-
-      echo "=== VERIFICAR ARQUIVOS NECESSARIOS ==="
-      missing=0
-
-      for file in \
-        settings.gradle \
-        build.gradle \
-        app/build.gradle \
-        app/src/main/AndroidManifest.xml \
-        app/src/main/java/com/jarvisone/iron/MainActivity.java \
-        app/src/main/java/com/jarvisone/iron/JarvisVoiceService.java \
-        app/src/main/assets/index.html
-      do
-        if [ -f "$file" ]; then
-          echo "OK: $file"
-        else
-          echo "::warning::Arquivo ausente: $file"
-          missing=1
-        fi
-      done
-
-      echo "=== FIM DA CONFERENCIA ==="
-      if [ "$missing" -eq 1 ]; then
-        echo "::warning::Existem arquivos ausentes. A compilacao mostrara se sao necessarios."
-      fi
-
-  - name: Preparar Gradle
-    uses: gradle/actions/setup-gradle@v4
-    with:
-      gradle-version: "8.9"
-
-  - name: Compilar APK
-    shell: bash
-    run: gradle --no-daemon :app:assembleDebug
-
-  - name: Validar APK
-    shell: bash
-    run: |
-      APK="app/build/outputs/apk/debug/app-debug.apk"
-
-      if [ ! -s "$APK" ]; then
-        echo "::error::APK nao encontrado ou vazio"
-        find . -type f -name "*.apk" -print || true
-        exit 1
-      fi
-
-      echo "=== APK GERADO ==="
-      ls -lh "$APK"
-      unzip -t "$APK"
-
-  - name: Publicar APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: JARVIS-ONE-IRON-EDITION-APK
-      path: app/build/outputs/apk/debug/app-debug.apk
-      if-no-files-found: error
-      retention-days: 7
-      compression-level: 0
+      echo "=== LOCALIZAR ARQUIVOS GRADLE ==="
+      find . -maxdepth 4 \( -name settings.gradle -o -name build.gradle \) -type f -print
+      echo "=== COMPILAR ==="
+      gradle --no-daemon -p "$GITHUB_WORKSPACE" :app:assembleDebug
