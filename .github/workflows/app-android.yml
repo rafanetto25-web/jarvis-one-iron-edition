@@ -16,35 +16,34 @@ name: Compilar APK Android
 runs-on: ubuntu-latest
 
 steps:
-  - name: Baixar projeto do rafanetto25-web
+  - name: Baixar projeto
     uses: actions/checkout@v4
     with:
       repository: rafanetto25-web/jarvis-one-iron-edition
       ref: rafanetto25-web-patch-1
-      persist-credentials: false
 
-  - name: Preparar Java 17
+  - name: Preparar Java
     uses: actions/setup-java@v4
     with:
       distribution: temurin
       java-version: "17"
 
-  - name: Conferir arquivos do projeto
+  - name: Conferir arquivos
     shell: bash
     run: |
       pwd
       ls -la
-      test -f settings.gradle || { echo "::error::settings.gradle não encontrado na raiz"; exit 1; }
-      test -f build.gradle || { echo "::error::build.gradle não encontrado na raiz"; exit 1; }
-      test -f app/build.gradle || { echo "::error::app/build.gradle não encontrado"; exit 1; }
-      test -f app/src/main/AndroidManifest.xml || { echo "::error::AndroidManifest.xml não encontrado"; exit 1; }
+      test -f settings.gradle
+      test -f build.gradle
+      test -f app/build.gradle
+      test -f app/src/main/AndroidManifest.xml
 
-  - name: Preparar Gradle 8.9
+  - name: Preparar Gradle
     uses: gradle/actions/setup-gradle@v4
     with:
       gradle-version: "8.9"
 
-  - name: Compilar APK Android
+  - name: Compilar APK
     shell: bash
     run: gradle --no-daemon :app:assembleDebug
 
@@ -53,14 +52,14 @@ steps:
     run: |
       APK="app/build/outputs/apk/debug/app-debug.apk"
       if [ ! -s "$APK" ]; then
-        echo "::error::APK não foi gerado ou está vazio"
+        echo "::error::APK não encontrado ou vazio"
         find . -type f -name "*.apk" -print || true
         exit 1
       fi
       ls -lh "$APK"
       unzip -t "$APK"
 
-  - name: Publicar APK para download
+  - name: Publicar APK
     uses: actions/upload-artifact@v4
     with:
       name: JARVIS-ONE-IRON-EDITION-APK
