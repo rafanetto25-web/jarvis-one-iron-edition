@@ -29,36 +29,28 @@ jobs:
       - name: Diagnosticar estrutura
         shell: bash
         run: |
-          echo "=== DIRETORIO DO PROJETO ==="
+          echo "=== RAIZ DO PROJETO ==="
           pwd
-          echo "=== ARQUIVOS DA RAIZ ==="
           ls -la
+
+          echo "=== MANIFEST COM NUMERACAO DE LINHAS ==="
+          if [ -f app/src/main/AndroidManifest.xml ]; then
+            nl -ba app/src/main/AndroidManifest.xml
+            echo "=== VALIDACAO XML ==="
+            python3 -c "import xml.etree.ElementTree as ET; ET.parse('app/src/main/AndroidManifest.xml'); print('XML VALIDO')"
+          else
+            echo "::error::AndroidManifest.xml nao encontrado"
+            exit 1
+          fi
 
           echo "=== ARQUIVOS GRADLE ==="
           find . -maxdepth 4 -type f \( \
             -name 'settings.gradle' -o \
-            -name 'settings.gradle.kts' -o \
-            -name 'build.gradle' -o \
-            -name 'build.gradle.kts' \
+            -name 'build.gradle' \
           \) -print
 
-          echo "=== ARQUIVOS DO APP ==="
-          find app/src/main -maxdepth 6 -type f -print 2>/dev/null || true
-
-          if [ ! -f settings.gradle ] && [ ! -f settings.gradle.kts ]; then
-            echo "::error::settings.gradle ausente na raiz"
-            exit 1
-          fi
-
-          if [ ! -f build.gradle ] && [ ! -f build.gradle.kts ]; then
-            echo "::error::build.gradle ausente na raiz"
-            exit 1
-          fi
-
-          if [ ! -f app/build.gradle ] && [ ! -f app/build.gradle.kts ]; then
-            echo "::error::Configuracao Gradle do app ausente"
-            exit 1
-          fi
+          echo "=== ARQUIVOS JAVA E HTML ==="
+          find app/src/main -type f -print
 
       - name: Preparar Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -70,10 +62,11 @@ jobs:
         run: |
           gradle -p "$GITHUB_WORKSPACE" projects --no-daemon
 
-      - name: Compilar APK
+      - name: Compilar APK com diagnostico
         shell: bash
         run: |
-          gradle -p "$GITHUB_WORKSPACE" :app:assembleDebug --no-daemon
+          gradle -p "$GITHUB_WORKSPACE" :app:assembleDebug \
+            --no-daemon --stacktrace --info
 
       - name: Validar APK
         shell: bash
