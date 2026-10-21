@@ -1,17 +1,23 @@
+
 plugins {
-id 'com.android.application'
+    id 'com.android.application'
 }
 
 android {
-namespace 'com.jarvisone.iron'
-compileSdk 35
+    namespace 'com.jarvisone.iron'
+    compileSdk 35
 
-defaultConfig {
-    applicationId 'com.jarvisone.iron'
-    minSdk 23
-    targetSdk 35
-    versionCode 2
-    versionName '1.1'
-}
+    defaultConfig {
+        applicationId 'com.jarvisone.iron'
+        minSdk 23
+        targetSdk 35
+        versionCode 2
+        versionName '1.1'
+    }
 
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
 }
