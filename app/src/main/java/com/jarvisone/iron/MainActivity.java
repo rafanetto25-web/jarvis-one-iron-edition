@@ -15,6 +15,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 public class MainActivity extends Activity {
 
     private static final int REQUEST_MICROPHONE = 100;
@@ -42,11 +44,8 @@ public class MainActivity extends Activity {
 
         navegador.setWebViewClient(new WebViewClient() {
             @Override
-            public void onPageFinished(
-                    WebView view,
-                    String url) {
+            public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-
                 pageLoaded = true;
                 deliverPendingCommand();
             }
@@ -56,19 +55,12 @@ public class MainActivity extends Activity {
             @Override
             public void onPermissionRequest(PermissionRequest pedido) {
                 runOnUiThread(() -> {
-                    if (Build.VERSION.SDK_INT >= 23 &&
-                            checkSelfPermission(
-                                    Manifest.permission.RECORD_AUDIO)
-                                    != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissions(
-                                new String[]{
-                                        Manifest.permission.RECORD_AUDIO
-                                },
-                                REQUEST_MICROPHONE
-                        );
+                    if (Build.VERSION.SDK_INT >= 23
+                            && !hasMicrophonePermission()) {
+                        requestMicrophonePermission();
                         Toast.makeText(
                                 MainActivity.this,
-                                "Permita o microfone e tente novamente.",
+                                "Autorize o microfone e tente novamente.",
                                 Toast.LENGTH_LONG
                         ).show();
                     } else {
@@ -83,10 +75,20 @@ public class MainActivity extends Activity {
 
         handleVoiceCommand(getIntent());
 
-        if (Build.VERSION.SDK_INT >= 23 &&
-                checkSelfPermission(
-                        Manifest.permission.RECORD_AUDIO)
-                        != PackageManager.PERMISSION_GRANTED) {
+        if (!hasMicrophonePermission()) {
+            requestMicrophonePermission();
+        }
+    }
+
+    private boolean hasMicrophonePermission() {
+        return Build.VERSION.SDK_INT < 23
+                || checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestMicrophonePermission() {
+        if (Build.VERSION.SDK_INT >= 23
+                && !hasMicrophonePermission()) {
             requestPermissions(
                     new String[]{Manifest.permission.RECORD_AUDIO},
                     REQUEST_MICROPHONE
@@ -95,9 +97,9 @@ public class MainActivity extends Activity {
     }
 
     private void handleVoiceCommand(Intent intent) {
-        if (intent == null ||
-                !"com.jarvisone.iron.VOICE_COMMAND".equals(
-                        intent.getAction())) {
+        if (intent == null
+                || !"com.jarvisone.iron.VOICE_COMMAND".equals(
+                intent.getAction())) {
             return;
         }
 
@@ -112,9 +114,9 @@ public class MainActivity extends Activity {
     }
 
     private void deliverPendingCommand() {
-        if (!pageLoaded ||
-                navegador == null ||
-                pendingCommand == null) {
+        if (!pageLoaded
+                || navegador == null
+                || pendingCommand == null) {
             return;
         }
 
@@ -122,11 +124,11 @@ public class MainActivity extends Activity {
         pendingCommand = null;
 
         String script =
-                "if (typeof window.jarvisReceiveCommand === 'function') {" +
-                "window.jarvisReceiveCommand(" +
-                org.json.JSONObject.quote(text) +
-                ");" +
-                "}";
+                "if (typeof window.jarvisReceiveCommand === 'function') {"
+                        + "window.jarvisReceiveCommand("
+                        + JSONObject.quote(text)
+                        + ");"
+                        + "}";
 
         navegador.evaluateJavascript(script, null);
     }
@@ -138,24 +140,13 @@ public class MainActivity extends Activity {
         handleVoiceCommand(intent);
     }
 
-    private boolean hasMicrophonePermission() {
-        return Build.VERSION.SDK_INT < 23 ||
-                checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                        == PackageManager.PERMISSION_GRANTED;
-    }
-
     private class JarvisBridge {
 
         @JavascriptInterface
         public void startVoiceService() {
             runOnUiThread(() -> {
                 if (!hasMicrophonePermission()) {
-                    requestPermissions(
-                            new String[]{
-                                    Manifest.permission.RECORD_AUDIO
-                            },
-                            REQUEST_MICROPHONE
-                    );
+                    requestMicrophonePermission();
 
                     Toast.makeText(
                             MainActivity.this,
@@ -186,8 +177,8 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     Toast.makeText(
                             MainActivity.this,
-                            "Não foi possível iniciar a escuta. " +
-                                    "Verifique as permissões.",
+                            "Não foi possível iniciar a escuta. "
+                                    + "Verifique as permissões.",
                             Toast.LENGTH_LONG
                     ).show();
                 }
@@ -207,7 +198,11 @@ public class MainActivity extends Activity {
                 );
 
                 try {
-                    startService(service);
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        startForegroundService(service);
+                    } else {
+                        startService(service);
+                    }
                 } catch (Exception e) {
                     Toast.makeText(
                             MainActivity.this,
@@ -232,8 +227,8 @@ public class MainActivity extends Activity {
         );
 
         if (requestCode == REQUEST_MICROPHONE) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(
                         this,
                         "Microfone autorizado. Toque no botão de voz.",
