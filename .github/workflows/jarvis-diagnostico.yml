@@ -1,0 +1,70 @@
+
+name: JARVIS - Diagnostico APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - rafanetto25-web-patch-1
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostico:
+    name: Verificar arquivos Android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Verificar estrutura e Manifest
+        shell: bash
+        run: |
+          echo "=== RAIZ DO PROJETO ==="
+          pwd
+          ls -la
+
+          echo "=== ARQUIVOS GRADLE ==="
+          find . -maxdepth 4 -type f \( \
+            -name 'settings.gradle' -o \
+            -name 'build.gradle' -o \
+            -name 'gradlew' \
+          \) -print
+
+          echo "=== ARQUIVOS EM app/src/main ==="
+          if [ -d app/src/main ]; then
+            find app/src/main -type f -print
+          else
+            echo "::error::Pasta app/src/main não encontrada"
+            exit 1
+          fi
+
+          echo "=== MANIFEST ==="
+          if [ ! -f app/src/main/AndroidManifest.xml ]; then
+            echo "::error::AndroidManifest.xml não encontrado"
+            exit 1
+          fi
+
+          nl -ba app/src/main/AndroidManifest.xml
+
+          echo "=== VALIDAR XML ==="
+          python3 -c "import xml.etree.ElementTree as ET; ET.parse('app/src/main/AndroidManifest.xml'); print('XML VALIDO')"
+
+      - name: Verificar configuracao Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Verificar modulos Gradle
+        run: gradle projects --no-daemon --stacktrace
+
+      - name: Testar compilacao
+        run: gradle :app:processDebugMainManifest --no-daemon --stacktrace
